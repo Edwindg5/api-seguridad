@@ -1,7 +1,8 @@
-//api-seguridad/resources/police/domain/entities/police.go
+// api-seguridad/resources/police/domain/entities/police.go
 package entity
 
 import (
+	entity "api-seguridad/resources/type_police/domain/entities"
 	"time"
 )
 
@@ -20,5 +21,5 @@ type Police struct {
 	UpdatedBy     uint      `json:"updated_by"`
 	Deleted       bool      `gorm:"default:false" json:"deleted"`
 
-	TypePolice *TypePolice `gorm:"foreignKey:TypePoliceID" json:"type_police,omitempty"`
+	TypePolice *entity.TypePolice `gorm:"foreignKey:TypePoliceID" json:"type_police,omitempty"`
 }

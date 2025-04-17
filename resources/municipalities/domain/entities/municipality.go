@@ -1,7 +1,8 @@
-//api-seguridad/resources/municipalities/domain/entities/municipality.go
+// api-seguridad/resources/municipalities/domain/entities/municipality.go
 package entity
 
 import (
+	
 	"time"
 )
 
@@ -14,5 +15,4 @@ type Municipality struct {
 	UpdatedBy uint      `json:"updated_by"`
 	Deleted   bool      `gorm:"default:false" json:"deleted"`
 
-	Delegations []*Delegation `gorm:"foreignKey:MunicipalityID" json:"delegations,omitempty"`
 }

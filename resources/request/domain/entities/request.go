@@ -4,6 +4,7 @@ package entity
 import (
 	"time"
 	"api-seguridad/resources/police/domain/entities"
+	municipalitiesentity "api-seguridad/resources/municipalities/domain/entities"
 
 )
 
@@ -27,7 +28,7 @@ type Request struct {
 	UpdatedBy              uint      `json:"updated_by"`
 	Deleted                bool      `gorm:"default:false" json:"deleted"`
 
-	Municipality *Municipality `gorm:"foreignKey:MunicipalityID" json:"municipality,omitempty"`
+	Municipality *municipalitiesentity.Municipality `gorm:"foreignKey:MunicipalityID" json:"municipality,omitempty"`
 	Status       *RequestStatus `gorm:"foreignKey:StatusID" json:"status,omitempty"`
 	Police       []*entity.Police      `gorm:"many2many:request_details;" json:"police,omitempty"`
 }
