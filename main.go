@@ -1,43 +1,39 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
+	"api-seguridad/core/config"
+	"api-seguridad/core/database"
+	municipalroutes "api-seguridad/resources/municipalities/infrastructure/routes"
+	policeroutes "api-seguridad/resources/police/infrastructure/routes"
+	requestroutes "api-seguridad/resources/request/infrastructure/routes"
+	roleroutes "api-seguridad/resources/roles/infrastructure/routes"
+	userroutes "api-seguridad/resources/users/infrastructure/routes"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// Cargar variables de entorno desde el archivo .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("❌ Error al cargar .env: %v", err)
+	// Inicializar base de datos
+	database.InitDB()
+
+	// Crear router
+	router := gin.Default()
+
+	// Configurar rutas base
+	api := router.Group("/api/v1")
+	{
+		userroutes.ConfigureRoutes(api)
+		roleroutes.ConfigureRoutes(api)
+		policeroutes.ConfigureRoutes(api)
+		requestroutes.ConfigureRoutes(api)
+		municipalroutes.ConfigureRoutes(api)
 	}
 
-	// Obtener variables de entorno en el mismo orden
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	dbname := os.Getenv("DB_NAME")
-
-	// Crear string de conexión
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
-
-	// Conexión a la base de datos
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		log.Fatalf("❌ Error al abrir conexión: %v", err)
+	// Iniciar servidor
+	cfg := config.LoadConfig()
+	log.Printf("Server running on port %s", cfg.AppPort)
+	if err := router.Run(":" + cfg.AppPort); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
 	}
-	defer db.Close()
-
-	// Verificar si la conexión es exitosa
-	if err = db.Ping(); err != nil {
-		log.Fatalf("❌ No se pudo conectar a la base de datos: %v", err)
-	}
-
-	log.Println("✅ Conexión exitosa a la base de datos 🎉")
 }
