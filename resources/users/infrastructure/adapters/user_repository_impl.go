@@ -1,12 +1,14 @@
+// api-seguridad/resources/users/infrastructure/adapters/user_repository_impl.go
 package adapters
 
 import (
 	"context"
 	"errors"
-	
+
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -19,9 +21,13 @@ func NewUserRepository(db *gorm.DB) repository.UserRepository {
 }
 
 func (r *UserRepositoryImpl) Create(ctx context.Context, user *entity.User) error {
-	return r.db.WithContext(ctx).Create(user).Error
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+    user.Password = string(hashedPassword)
+    return r.db.WithContext(ctx).Create(user).Error
 }
-
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entity.User, error) {
 	var user entity.User
 	err := r.db.WithContext(ctx).Preload("Role").First(&user, id).Error

@@ -1,13 +1,18 @@
+// api-seguridad/resources/users/application/user_service.go
 package application
 
 import (
-	"context"
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
+	"context"
 )
 
 type UserService struct {
 	userRepo repository.UserRepository
+}
+
+func (s *UserService) GetRoleByID(context context.Context, d uint) (any, any) { // <-- aqui corri ge la logica de como se obtine el rol del recurso role porfas
+	panic("unimplemented")
 }
 
 func NewUserService(userRepo repository.UserRepository) *UserService {

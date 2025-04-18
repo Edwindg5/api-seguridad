@@ -1,3 +1,4 @@
+//api-seguridad/resources/users/infrastructure/controllers/user_controller.go
 package controllers
 
 import (
@@ -19,18 +20,24 @@ func NewUserController(userService *application.UserService) *UserController {
 }
 
 func (c *UserController) CreateUser(ctx *gin.Context) {
-	var user entity.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
-		return
-	}
+    var user entity.User
+    if err := ctx.ShouldBindJSON(&user); err != nil {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
+        return
+    }
 
-	if err := c.userService.CreateUser(ctx.Request.Context(), &user); err != nil {
-		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create user", err)
-		return
-	}
+    // Validar que el rol exista
+    if _, err := c.userService.GetRoleByID(ctx.Request.Context(), user.RoleID); err != nil {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid role ID", err)
+        return
+    }
 
-	utils.SuccessResponse(ctx, http.StatusCreated, "User created successfully", user)
+    if err := c.userService.CreateUser(ctx.Request.Context(), &user); err != nil {
+        utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create user", err)
+        return
+    }
+
+    utils.SuccessResponse(ctx, http.StatusCreated, "User created successfully", user)
 }
 
 func (c *UserController) GetUser(ctx *gin.Context) {

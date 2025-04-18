@@ -1,3 +1,4 @@
+//api-seguridad/resources/police/infrastructure/routes/police_routes.go
 package routes
 
 import (

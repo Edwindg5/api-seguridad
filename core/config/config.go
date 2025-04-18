@@ -1,3 +1,4 @@
+// api-seguridad/core/config/config.go
 package config
 
 import (

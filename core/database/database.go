@@ -1,9 +1,23 @@
+//api-seguridad/core/database/database.go
 package database
 
 import (
 	"fmt"
 	"log"
+
 	"api-seguridad/core/config"
+
+	entitydelegation "api-seguridad/resources/delegation/domain/entities"
+	entitymunicipalities "api-seguridad/resources/municipalities/domain/entities"
+
+	entitypolice "api-seguridad/resources/police/domain/entities"
+	entityrequest "api-seguridad/resources/request/domain/entities"
+
+
+	entityroles "api-seguridad/resources/roles/domain/entities"
+
+	entitytypepolice "api-seguridad/resources/type_police/domain/entities"
+	entityusers "api-seguridad/resources/users/domain/entities"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,9 +50,16 @@ func GetDB() *gorm.DB {
 }
 
 func RunMigrations() {
-	// Importa todas las entidades aquí
+
 	err := DB.AutoMigrate(
-	// Las entidades se agregarán después de definirlas
+		&entitydelegation.Delegation{},
+		&entitymunicipalities.Municipality{},
+		&entitypolice.Police{},
+		&entityrequest.Request{},
+		&entityrequest.RequestStatus{},
+		&entityroles.Role{},
+		&entitytypepolice.TypePolice{},
+		&entityusers.User{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to run migrations: %v", err)

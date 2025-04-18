@@ -1,3 +1,4 @@
+// api-seguridad/core/middleware/auth.go
 package middleware
 
 import (

@@ -1,3 +1,4 @@
+//api-seguridad/resources/users/domain/repository/user_repository.go
 package repository
 
 import (
@@ -13,4 +14,5 @@ type UserRepository interface {
 	Update(ctx context.Context, user *entity.User) error
 	Delete(ctx context.Context, id uint) error
 	List(ctx context.Context) ([]*entity.User, error)
+	
 }

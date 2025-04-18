@@ -1,12 +1,18 @@
+//api-seguridad/main.go
 package main
 
 import (
 	"api-seguridad/core/config"
 	"api-seguridad/core/database"
+	municipaldeps "api-seguridad/resources/municipalities/infrastructure/dependencies"
 	municipalroutes "api-seguridad/resources/municipalities/infrastructure/routes"
+	policedeps "api-seguridad/resources/police/infrastructure/dependencies"
 	policeroutes "api-seguridad/resources/police/infrastructure/routes"
+	requestdeps "api-seguridad/resources/request/infrastructure/dependencies"
 	requestroutes "api-seguridad/resources/request/infrastructure/routes"
+	roledeps "api-seguridad/resources/roles/infrastructure/dependencies"
 	roleroutes "api-seguridad/resources/roles/infrastructure/routes"
+	userdeps "api-seguridad/resources/users/infrastructure/dependencies"
 	userroutes "api-seguridad/resources/users/infrastructure/routes"
 	"log"
 
@@ -16,6 +22,13 @@ import (
 func main() {
 	// Inicializar base de datos
 	database.InitDB()
+
+	// Inicializar dependencias
+	userdeps.InitDependencies()
+	roledeps.InitDependencies()
+	policedeps.InitDependencies()
+	requestdeps.InitDependencies()
+	municipaldeps.InitDependencies()
 
 	// Crear router
 	router := gin.Default()
