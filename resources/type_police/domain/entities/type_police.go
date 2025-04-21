@@ -1,5 +1,5 @@
 //api-seguridad/resources/type_police/domain/entities/type_police.go
-package entity
+package entities
 
 import (
 	"time"

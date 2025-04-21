@@ -9,17 +9,47 @@ import (
 )
 
 var (
-	roleRepo     repository.RoleRepository
-	roleService  *application.RoleService
+	roleRepo repository.RoleRepository
+
+	// Casos de uso
+	createRoleUseCase     *application.CreateRoleUseCase
+	getRoleByIDUseCase    *application.GetRoleByIDUseCase
+	getAllRolesUseCase    *application.GetAllRolesUseCase
+	updateRoleUseCase     *application.UpdateRoleUseCase
+	softDeleteRoleUseCase *application.SoftDeleteRoleUseCase
 )
 
 func InitDependencies() {
 	db := database.GetDB()
 	
+	// Inicializar repositorio
 	roleRepo = adapters.NewRoleRepository(db)
-	roleService = application.NewRoleService(roleRepo)
+	
+	// Inicializar casos de uso
+	createRoleUseCase = application.NewCreateRoleUseCase(roleRepo)
+	getRoleByIDUseCase = application.NewGetRoleByIDUseCase(roleRepo)
+	getAllRolesUseCase = application.NewGetAllRolesUseCase(roleRepo)
+	updateRoleUseCase = application.NewUpdateRoleUseCase(roleRepo)
+	softDeleteRoleUseCase = application.NewSoftDeleteRoleUseCase(roleRepo)
 }
 
-func GetRoleService() *application.RoleService {
-	return roleService
+// Funciones para obtener los casos de uso
+func GetCreateRoleUseCase() *application.CreateRoleUseCase {
+	return createRoleUseCase
+}
+
+func GetRoleByIDUseCase() *application.GetRoleByIDUseCase {
+	return getRoleByIDUseCase
+}
+
+func GetAllRolesUseCase() *application.GetAllRolesUseCase {
+	return getAllRolesUseCase
+}
+
+func GetUpdateRoleUseCase() *application.UpdateRoleUseCase {
+	return updateRoleUseCase
+}
+
+func GetSoftDeleteRoleUseCase() *application.SoftDeleteRoleUseCase {
+	return softDeleteRoleUseCase
 }

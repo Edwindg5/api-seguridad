@@ -7,10 +7,11 @@ import (
 )
 
 type RoleRepository interface {
-	Create(ctx context.Context, role *entity.Role) error
-	GetByID(ctx context.Context, id uint) (*entity.Role, error)
-	GetByTitle(ctx context.Context, title string) (*entity.Role, error)
-	Update(ctx context.Context, role *entity.Role) error
-	Delete(ctx context.Context, id uint) error
-	List(ctx context.Context) ([]*entity.Role, error)
+
+	Create(ctx context.Context, role *entities.Role) error
+	GetByID(ctx context.Context, id uint) (*entities.Role, error)
+	GetAll(ctx context.Context) ([]*entities.Role, error)
+	Update(ctx context.Context, role *entities.Role) error
+	SoftDelete(ctx context.Context, id uint) error
+	
 }

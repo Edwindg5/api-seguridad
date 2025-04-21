@@ -1,8 +1,7 @@
 // api-seguridad/resources/municipalities/domain/entities/municipality.go
-package entity
+package entities
 
 import (
-	
 	"time"
 )
 
@@ -14,5 +13,4 @@ type Municipality struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 	UpdatedBy uint      `json:"updated_by"`
 	Deleted   bool      `gorm:"default:false" json:"deleted"`
-
 }

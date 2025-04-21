@@ -19,12 +19,12 @@ func NewRoleRepository(db *gorm.DB) repository.RoleRepository {
 	return &RoleRepositoryImpl{db: db}
 }
 
-func (r *RoleRepositoryImpl) Create(ctx context.Context, role *entity.Role) error {
+func (r *RoleRepositoryImpl) Create(ctx context.Context, role *entities.Role) error {
 	return r.db.WithContext(ctx).Create(role).Error
 }
 
-func (r *RoleRepositoryImpl) GetByID(ctx context.Context, id uint) (*entity.Role, error) {
-	var role entity.Role
+func (r *RoleRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Role, error) {
+	var role entities.Role
 	err := r.db.WithContext(ctx).First(&role, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -32,25 +32,18 @@ func (r *RoleRepositoryImpl) GetByID(ctx context.Context, id uint) (*entity.Role
 	return &role, err
 }
 
-func (r *RoleRepositoryImpl) GetByTitle(ctx context.Context, title string) (*entity.Role, error) {
-	var role entity.Role
-	err := r.db.WithContext(ctx).Where("title = ?", title).First(&role).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	return &role, err
+func (r *RoleRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Role, error) {
+	var roles []*entities.Role
+	err := r.db.WithContext(ctx).Where("deleted = ?", false).Find(&roles).Error
+	return roles, err
 }
 
-func (r *RoleRepositoryImpl) Update(ctx context.Context, role *entity.Role) error {
+func (r *RoleRepositoryImpl) Update(ctx context.Context, role *entities.Role) error {
 	return r.db.WithContext(ctx).Save(role).Error
 }
 
-func (r *RoleRepositoryImpl) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&entity.Role{}, id).Error
-}
-
-func (r *RoleRepositoryImpl) List(ctx context.Context) ([]*entity.Role, error) {
-	var roles []*entity.Role
-	err := r.db.WithContext(ctx).Find(&roles).Error
-	return roles, err
+func (r *RoleRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Model(&entities.Role{}).
+		Where("id = ?", id).
+		Update("deleted", true).Error
 }

@@ -1,5 +1,5 @@
 //api-seguridad/resources/request/domain/entities/request_status.go
-package entity
+package entities
 
 import (
 	"time"
