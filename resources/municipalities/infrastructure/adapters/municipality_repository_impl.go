@@ -19,38 +19,49 @@ func NewMunicipalityRepository(db *gorm.DB) repository.MunicipalityRepository {
 	return &MunicipalityRepositoryImpl{db: db}
 }
 
-func (r *MunicipalityRepositoryImpl) Create(ctx context.Context, municipality *entity.Municipality) error {
+func (r *MunicipalityRepositoryImpl) Create(ctx context.Context, municipality *entities.Municipality) error {
 	return r.db.WithContext(ctx).Create(municipality).Error
 }
 
-func (r *MunicipalityRepositoryImpl) GetByID(ctx context.Context, id uint) (*entity.Municipality, error) {
-	var municipality entity.Municipality
-	err := r.db.WithContext(ctx).Preload("Delegations").First(&municipality, id).Error
+func (r *MunicipalityRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Municipality, error) {
+	var municipality entities.Municipality
+	err := r.db.WithContext(ctx).
+		Where("id_municipalities = ? AND deleted = ?", id, false).
+		First(&municipality).Error
+		
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	return &municipality, err
 }
 
-func (r *MunicipalityRepositoryImpl) GetByName(ctx context.Context, name string) (*entity.Municipality, error) {
-	var municipality entity.Municipality
-	err := r.db.WithContext(ctx).Where("name = ?", name).First(&municipality).Error
+func (r *MunicipalityRepositoryImpl) GetByName(ctx context.Context, name string) (*entities.Municipality, error) {
+	var municipality entities.Municipality
+	err := r.db.WithContext(ctx).
+		Where("name_municipalities = ? AND deleted = ?", name, false).
+		First(&municipality).Error
+		
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	return &municipality, err
 }
 
-func (r *MunicipalityRepositoryImpl) Update(ctx context.Context, municipality *entity.Municipality) error {
+func (r *MunicipalityRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Municipality, error) {
+	var municipalities []*entities.Municipality
+	err := r.db.WithContext(ctx).
+		Where("deleted = ?", false).
+		Find(&municipalities).Error
+	return municipalities, err
+}
+
+func (r *MunicipalityRepositoryImpl) Update(ctx context.Context, municipality *entities.Municipality) error {
 	return r.db.WithContext(ctx).Save(municipality).Error
 }
 
-func (r *MunicipalityRepositoryImpl) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&entity.Municipality{}, id).Error
-}
-
-func (r *MunicipalityRepositoryImpl) List(ctx context.Context) ([]*entity.Municipality, error) {
-	var municipalities []*entity.Municipality
-	err := r.db.WithContext(ctx).Preload("Delegations").Find(&municipalities).Error
-	return municipalities, err
+func (r *MunicipalityRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).
+		Model(&entities.Municipality{}).
+		Where("id_municipalities = ?", id).
+		Update("deleted", true).Error
 }
