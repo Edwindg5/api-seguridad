@@ -11,8 +11,6 @@ import (
 	entitymunicipalities "api-seguridad/resources/municipalities/domain/entities"
 
 	entitypolice "api-seguridad/resources/police/domain/entities"
-	entityrequest "api-seguridad/resources/request/domain/entities"
-
 
 	entityroles "api-seguridad/resources/roles/domain/entities"
 
@@ -55,8 +53,6 @@ func RunMigrations() {
 		&entitydelegation.Delegation{},
 		&entitymunicipalities.Municipality{},
 		&entitypolice.Police{},
-		&entityrequest.Request{},
-		&entityrequest.RequestStatus{},
 		&entityroles.Role{},
 		&entitytypepolice.TypePolice{},
 		&entityusers.User{},

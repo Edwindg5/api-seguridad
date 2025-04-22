@@ -7,10 +7,16 @@ import (
 )
 
 type PoliceRepository interface {
-	Create(ctx context.Context, police *entity.Police) error
-	GetByID(ctx context.Context, id uint) (*entity.Police, error)
-	GetByCUIP(ctx context.Context, cuip string) (*entity.Police, error)
-	Update(ctx context.Context, police *entity.Police) error
-	Delete(ctx context.Context, id uint) error
-	List(ctx context.Context) ([]*entity.Police, error)
+	// Basic CRUD operations
+	Create(ctx context.Context, police *entities.Police) error
+	GetByID(ctx context.Context, id uint) (*entities.Police, error)
+	GetAll(ctx context.Context) ([]*entities.Police, error)
+	Update(ctx context.Context, police *entities.Police) error
+	SoftDelete(ctx context.Context, id uint) error
+
+	// Specialized search methods
+	GetByCUIP(ctx context.Context, cuip string) (*entities.Police, error)
+	GetByRFC(ctx context.Context, rfc string) (*entities.Police, error)
+	SearchByName(ctx context.Context, name string) ([]*entities.Police, error)
+	SearchByFullName(ctx context.Context, name, paternalName, maternalName string) ([]*entities.Police, error)
 }

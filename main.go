@@ -8,8 +8,6 @@ import (
 	municipalroutes "api-seguridad/resources/municipalities/infrastructure/routes"
 	policedeps "api-seguridad/resources/police/infrastructure/dependencies"
 	policeroutes "api-seguridad/resources/police/infrastructure/routes"
-	requestdeps "api-seguridad/resources/request/infrastructure/dependencies"
-	requestroutes "api-seguridad/resources/request/infrastructure/routes"
 	roledeps "api-seguridad/resources/roles/infrastructure/dependencies"
 	roleroutes "api-seguridad/resources/roles/infrastructure/routes"
 	userdeps "api-seguridad/resources/users/infrastructure/dependencies"
@@ -27,7 +25,6 @@ func main() {
 	userdeps.InitDependencies()
 	roledeps.InitDependencies()
 	policedeps.InitDependencies()
-	requestdeps.InitDependencies()
 	municipaldeps.InitDependencies()
 
 	// Crear router
@@ -39,7 +36,6 @@ func main() {
 		userroutes.ConfigureRoutes(api)
 		roleroutes.ConfigureRoutes(api)
 		policeroutes.ConfigureRoutes(api)
-		requestroutes.ConfigureRoutes(api)
 		municipalroutes.ConfigureRoutes(api)
 	}
 

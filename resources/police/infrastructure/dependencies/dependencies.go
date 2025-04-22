@@ -9,17 +9,64 @@ import (
 )
 
 var (
-	policeRepo     repository.PoliceRepository
-	policeService  *application.PoliceService
+	policeRepo repository.PoliceRepository
+
+	// Use Cases
+	createPoliceUseCase     *application.CreatePoliceUseCase
+	getPoliceByIDUseCase    *application.GetPoliceByIDUseCase
+	getAllPoliceUseCase     *application.GetAllPoliceUseCase
+	updatePoliceUseCase     *application.UpdatePoliceUseCase
+	softDeletePoliceUseCase *application.SoftDeletePoliceUseCase
+	getPoliceByCUIPUseCase  *application.GetPoliceByCUIPUseCase
+	searchPoliceByNameUseCase *application.SearchPoliceByNameUseCase
 )
 
 func InitDependencies() {
 	db := database.GetDB()
 	
+	// Initialize repository
 	policeRepo = adapters.NewPoliceRepository(db)
-	policeService = application.NewPoliceService(policeRepo)
+	
+	// Initialize use cases
+	createPoliceUseCase = application.NewCreatePoliceUseCase(policeRepo)
+	getPoliceByIDUseCase = application.NewGetPoliceByIDUseCase(policeRepo)
+	getAllPoliceUseCase = application.NewGetAllPoliceUseCase(policeRepo)
+	updatePoliceUseCase = application.NewUpdatePoliceUseCase(policeRepo)
+	softDeletePoliceUseCase = application.NewSoftDeletePoliceUseCase(policeRepo)
+	getPoliceByCUIPUseCase = application.NewGetPoliceByCUIPUseCase(policeRepo)
+	searchPoliceByNameUseCase = application.NewSearchPoliceByNameUseCase(policeRepo)
 }
 
-func GetPoliceService() *application.PoliceService {
-	return policeService
+// Getter functions for use cases
+func GetCreatePoliceUseCase() *application.CreatePoliceUseCase {
+	return createPoliceUseCase
+}
+
+func GetPoliceByIDUseCase() *application.GetPoliceByIDUseCase {
+	return getPoliceByIDUseCase
+}
+
+func GetAllPoliceUseCase() *application.GetAllPoliceUseCase {
+	return getAllPoliceUseCase
+}
+
+func GetUpdatePoliceUseCase() *application.UpdatePoliceUseCase {
+	return updatePoliceUseCase
+}
+
+func GetSoftDeletePoliceUseCase() *application.SoftDeletePoliceUseCase {
+	return softDeletePoliceUseCase
+}
+
+func GetPoliceByCUIPUseCase() *application.GetPoliceByCUIPUseCase {
+	return getPoliceByCUIPUseCase
+}
+
+func GetSearchPoliceByNameUseCase() *application.SearchPoliceByNameUseCase {
+	return searchPoliceByNameUseCase
+}
+
+// Repository getter
+func GetPoliceRepository() repository.PoliceRepository {
+	return policeRepo
 }
