@@ -48,17 +48,30 @@ func GetDB() *gorm.DB {
 }
 
 func RunMigrations() {
+    // 1. Primero tablas base sin dependencias
+    err := DB.AutoMigrate(
+        &entityroles.Role{},
+        &entitytypepolice.TypePolice{},
+        &entityusers.User{},
+    )
+    if err != nil {
+        log.Fatalf("Failed to run base migrations: %v", err)
+    }
 
-	err := DB.AutoMigrate(
-		&entitydelegation.Delegation{},
-		&entitymunicipalities.Municipality{},
-		&entitypolice.Police{},
-		&entityroles.Role{},
-		&entitytypepolice.TypePolice{},
-		&entityusers.User{},
-	)
-	if err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-	log.Println("Migrations completed successfully")
+    // 2. Luego municipalities que es referenciada
+    err = DB.AutoMigrate(&entitymunicipalities.Municipality{})
+    if err != nil {
+        log.Fatalf("Failed to migrate Municipalities: %v", err)
+    }
+
+    // 3. Finalmente tablas con FKs
+    err = DB.AutoMigrate(
+        &entitydelegation.Delegation{},
+        &entitypolice.Police{},
+    )
+    if err != nil {
+        log.Fatalf("Failed to run dependent migrations: %v", err)
+    }
+
+    log.Println("All migrations completed successfully")
 }

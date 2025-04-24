@@ -1,3 +1,4 @@
+//api-seguridad/resources/type_police/application/get_all_usecase.go
 package application
 
 import (

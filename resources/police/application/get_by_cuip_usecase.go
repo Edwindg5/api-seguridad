@@ -1,3 +1,4 @@
+//api-seguridad/resources/police/application/get_by_cuip_usecase.go
 package application
 
 import (

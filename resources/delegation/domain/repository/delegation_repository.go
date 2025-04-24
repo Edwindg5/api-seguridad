@@ -1,3 +1,4 @@
+// api-seguridad/resources/delegation/domain/repository/delegation_repository.go
 package repository
 
 import (

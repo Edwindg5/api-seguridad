@@ -21,27 +21,33 @@ func NewUserRepository(db *gorm.DB) repository.UserRepository {
 }
 
 func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	user.Password = string(hashedPassword)
-	return r.db.WithContext(ctx).Create(user).Error
+    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+    if err != nil {
+        return err
+    }
+    user.Password = string(hashedPassword)
+
+    // Crear el usuario omitiendo los campos created_by y updated_by si son 0
+    if user.CreatedBy == 0 && user.UpdatedBy == 0 {
+        return r.db.WithContext(ctx).Omit("created_by", "updated_by").Create(user).Error
+    }
+    
+    return r.db.WithContext(ctx).Create(user).Error
 }
 
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.User, error) {
-	var user entities.User
-	err := r.db.WithContext(ctx).
-		Preload("Role").
-		Preload("Creator").
-		Preload("Updater").
-		Where("id = ? AND deleted = ?", id, false).
-		First(&user).Error
-	
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	return &user, err
+    var user entities.User
+    err := r.db.WithContext(ctx).
+        Preload("Role").
+        Preload("Creator").
+        Preload("Updater").
+        Where("id_user = ? AND deleted = ?", id, false). // Cambiado de "id" a "id_user"
+        First(&user).Error
+    
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return nil, nil
+    }
+    return &user, err
 }
 
 func (r *UserRepositoryImpl) GetByUsername(ctx context.Context, username string) (*entities.User, error) {
@@ -75,7 +81,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint, deleterID uint) error {
 	return r.db.WithContext(ctx).
 		Model(&entities.User{}).
-		Where("id = ?", id).
+		Where("id_user = ?", id).
 		Updates(map[string]interface{}{
 			"deleted":     true,
 			"updated_by":  deleterID,

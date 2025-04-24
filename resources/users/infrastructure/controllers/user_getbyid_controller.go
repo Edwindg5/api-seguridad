@@ -19,7 +19,7 @@ func NewUserGetByIDController(getByIDUC *application.GetUserByIDUseCase) *UserGe
 }
 
 func (c *UserGetByIDController) Handle(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
 	if err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", err)
 		return

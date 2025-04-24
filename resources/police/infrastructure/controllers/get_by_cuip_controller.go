@@ -1,3 +1,4 @@
+//api-seguridad/resources/police/infrastructure/controllers/get_by_cuip_controller.go
 package controllers
 
 import (

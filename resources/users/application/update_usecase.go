@@ -23,19 +23,19 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, u
 	if err != nil {
 		return err
 	}
-	if existingUser == nil {
+	if existingUser == nil || existingUser.Deleted {
 		return errors.New("user not found")
 	}
 
-	// Validar campos
+	// Validar campos únicos si han cambiado
 	if user.Username != existingUser.Username {
-		if _, err := uc.userRepo.GetByUsername(ctx, user.Username); err == nil {
+		if existing, err := uc.userRepo.GetByUsername(ctx, user.Username); err == nil && existing != nil {
 			return errors.New("new username already exists")
 		}
 	}
 
 	if user.Email != existingUser.Email {
-		if _, err := uc.userRepo.GetByEmail(ctx, user.Email); err == nil {
+		if existing, err := uc.userRepo.GetByEmail(ctx, user.Email); err == nil && existing != nil {
 			return errors.New("new email already exists")
 		}
 	}
@@ -45,9 +45,12 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, u
 	existingUser.LastName = user.LastName
 	existingUser.Username = user.Username
 	existingUser.Email = user.Email
+	
+	// Actualizar contraseña solo si se proporcionó una nueva
 	if user.Password != "" {
 		existingUser.Password = user.Password
 	}
+
 	existingUser.RoleID = user.RoleID
 	existingUser.UpdatedAt = time.Now()
 	existingUser.UpdatedBy = updaterID

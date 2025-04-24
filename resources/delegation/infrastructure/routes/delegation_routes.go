@@ -1,3 +1,4 @@
+//api-seguridad/resources/delegation/infrastructure/routes/delegation_routes.go
 package routes
 
 import (

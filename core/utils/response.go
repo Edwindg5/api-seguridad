@@ -2,8 +2,6 @@
 package utils
 
 import (
-	
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,17 +13,21 @@ type APIResponse struct {
 }
 
 func SuccessResponse(c *gin.Context, statusCode int, message string, data interface{}) {
-	c.JSON(statusCode, APIResponse{
+	response := APIResponse{
 		Success: true,
 		Message: message,
 		Data:    data,
-	})
+	}
+	c.JSON(statusCode, response)
 }
 
 func ErrorResponse(c *gin.Context, statusCode int, message string, err error) {
-	c.JSON(statusCode, APIResponse{
+	response := APIResponse{
 		Success: false,
 		Message: message,
-		Error:   err.Error(),
-	})
+	}
+	if err != nil {
+		response.Error = err.Error()
+	}
+	c.JSON(statusCode, response)
 }

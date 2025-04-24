@@ -1,3 +1,4 @@
+//api-seguridad/resources/type_police/application/soft_delete_usecase.go
 package application
 
 import (

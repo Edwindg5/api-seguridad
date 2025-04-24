@@ -1,12 +1,13 @@
-// api-seguridad/resources/users/infrastructure/controllers/user_update_controller.go
 package controllers
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"api-seguridad/resources/users/application"
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/core/utils"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,9 +21,11 @@ func NewUserUpdateController(updateUC *application.UpdateUserUseCase) *UserUpdat
 }
 
 func (c *UserUpdateController) Handle(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	// Obtener ID del usuario a actualizar
+	id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
 	if err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", err)
+		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", 
+			errors.New("el ID de usuario debe ser un número válido"))
 		return
 	}
 
@@ -32,13 +35,36 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Set the ID from URL param
+	// Asignar ID desde el parámetro de la URL
 	user.ID = uint(id)
 
-	// Get updater ID from context (assuming JWT middleware sets it)
-	updaterID, _ := ctx.Get("userID")
+	// Obtener ID del usuario que realiza la actualización
+	updaterID, exists := ctx.Get("userID")
+	if !exists {
+		utils.ErrorResponse(ctx, http.StatusUnauthorized, 
+			"Authentication required", 
+			errors.New("no se encontró userID en el contexto"))
+		return
+	}
 
-	if err := c.updateUC.Execute(ctx.Request.Context(), &user, updaterID.(uint)); err != nil {
+	// Convertir updaterID a uint de forma segura
+	var updater uint
+	switch v := updaterID.(type) {
+	case uint:
+		updater = v
+	case int:
+		updater = uint(v)
+	case float64:
+		updater = uint(v)
+	default:
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, 
+			"Invalid user ID type", 
+			fmt.Errorf("tipo de ID de usuario no válido: %T", updaterID))
+		return
+	}
+
+	// Ejecutar actualización
+	if err := c.updateUC.Execute(ctx.Request.Context(), &user, updater); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
 		   err.Error() == "new username already exists" ||

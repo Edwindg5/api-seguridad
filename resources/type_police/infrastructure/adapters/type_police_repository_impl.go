@@ -1,3 +1,4 @@
+//api-seguridad/resources/type_police/infrastructure/adapters/type_police_repository_impl.go
 package adapters
 
 import (

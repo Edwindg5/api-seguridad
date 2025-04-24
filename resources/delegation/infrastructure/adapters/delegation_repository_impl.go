@@ -1,3 +1,4 @@
+// api-seguridad/resources/delegation/infrastructure/adapters/delegation_repository_impl.go
 package adapters
 
 import (

@@ -2,10 +2,11 @@
 package controllers
 
 import (
-	"net/http"
+	"api-seguridad/core/utils"
 	"api-seguridad/resources/users/application"
 	"api-seguridad/resources/users/domain/entities"
-	"api-seguridad/core/utils"
+	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,22 +20,27 @@ func NewUserCreateController(createUC *application.CreateUserUseCase) *UserCreat
 }
 
 func (c *UserCreateController) Handle(ctx *gin.Context) {
-	var user entities.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
-		return
-	}
+    var user entities.User
+    if err := ctx.ShouldBindJSON(&user); err != nil {
+        fmt.Printf("Error binding JSON: %v\n", err) // Log de error
+ 
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
+        return
+    }
 
-	if err := c.createUC.Execute(ctx.Request.Context(), &user); err != nil {
-		statusCode := http.StatusInternalServerError
-		if err.Error() == "username already exists" || 
-		   err.Error() == "email already exists" ||
-		   err.Error() == "role_id is required" {
-			statusCode = http.StatusBadRequest
-		}
-		utils.ErrorResponse(ctx, statusCode, "Failed to create user", err)
-		return
-	}
+    fmt.Printf("User object before validation: %+v\n", user) // Log del objeto
 
-	utils.SuccessResponse(ctx, http.StatusCreated, "User created successfully", user)
+    if err := c.createUC.Execute(ctx.Request.Context(), &user); err != nil {
+        fmt.Printf("Create user error: %v\n", err) // Log de error
+        statusCode := http.StatusInternalServerError
+        if err.Error() == "username already exists" || 
+           err.Error() == "email already exists" ||
+           err.Error() == "role_id is required" {
+            statusCode = http.StatusBadRequest
+        }
+        utils.ErrorResponse(ctx, statusCode, "Failed to create user", err)
+        return
+    }
+
+    utils.SuccessResponse(ctx, http.StatusCreated, "User created successfully", user)
 }

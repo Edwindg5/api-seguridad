@@ -1,3 +1,4 @@
+//api-seguridad/resources/type_police/domain/repository/type_police_repository.go
 package repository
 
 import (

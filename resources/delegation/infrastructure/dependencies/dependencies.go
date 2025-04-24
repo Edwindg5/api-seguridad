@@ -1,3 +1,4 @@
+// api-seguridad/resources/delegation/infrastructure/dependencies/dependencies.go
 package dependencies
 
 import (
