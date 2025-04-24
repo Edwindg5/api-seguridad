@@ -4,6 +4,8 @@ package main
 import (
 	"api-seguridad/core/config"
 	"api-seguridad/core/database"
+	delegationdeps "api-seguridad/resources/delegation/infrastructure/dependencies"
+	delegationroutes "api-seguridad/resources/delegation/infrastructure/routes"
 	municipaldeps "api-seguridad/resources/municipalities/infrastructure/dependencies"
 	municipalroutes "api-seguridad/resources/municipalities/infrastructure/routes"
 	policedeps "api-seguridad/resources/police/infrastructure/dependencies"
@@ -26,6 +28,7 @@ func main() {
 	roledeps.InitDependencies()
 	policedeps.InitDependencies()
 	municipaldeps.InitDependencies()
+	delegationdeps.InitDependencies() // Añadir esta línea
 
 	// Crear router
 	router := gin.Default()
@@ -37,6 +40,7 @@ func main() {
 		roleroutes.ConfigureRoutes(api)
 		policeroutes.ConfigureRoutes(api)
 		municipalroutes.ConfigureRoutes(api)
+		delegationroutes.ConfigureRoutes(api) // Añadir esta línea
 	}
 
 	// Iniciar servidor

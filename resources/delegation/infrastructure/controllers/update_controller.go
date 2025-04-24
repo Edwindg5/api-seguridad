@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/delegation/application"
 	"api-seguridad/resources/delegation/domain/entities"
@@ -18,10 +19,28 @@ func NewUpdateDelegationController(useCase *application.UpdateDelegationUseCase)
 }
 
 func (c *UpdateDelegationController) Handle(ctx *gin.Context) {
+	// Obtener el ID de la URL
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid delegation ID", nil)
+		return
+	}
+
 	var delegation entities.Delegation
 	if err := ctx.ShouldBindJSON(&delegation); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
+	}
+
+	// Asignar el ID de la URL al objeto delegation
+	delegation.ID = uint(id)
+
+	// Obtener ID del usuario que realiza la actualización
+	if updaterID, exists := ctx.Get("userID"); exists {
+		if uid, ok := updaterID.(uint); ok {
+			delegation.UpdatedBy = uid
+		}
 	}
 
 	if err := c.useCase.Execute(ctx.Request.Context(), &delegation); err != nil {
