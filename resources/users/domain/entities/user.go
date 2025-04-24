@@ -8,21 +8,19 @@ import (
 
 type User struct {
 	ID        uint      `gorm:"primaryKey;column:id_user" json:"id"`
-	FirstName string    `gorm:"size:50;not null" json:"first_name"`
-	LastName  string    `gorm:"size:50;not null;column:lastname" json:"last_name"`
-	Username  string    `gorm:"size:50;unique;not null" json:"username"`
-	Email     string    `gorm:"size:50;unique;not null" json:"email"`
+	FirstName string    `gorm:"size:30;not null" json:"first_name"`
+	LastName  string    `gorm:"size:30;not null;column:lastname" json:"last_name"`
+	Username  string    `gorm:"size:30;unique;not null" json:"username"`
+	Email     string    `gorm:"size:30;unique;not null" json:"email"`
 	Password  string    `gorm:"size:255;not null" json:"password"` 
 	RoleID    uint      `gorm:"column:rol_id_fk;not null" json:"role_id"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
-	CreatedBy uint      `json:"created_by"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at"`
-	UpdatedBy uint      `json:"updated_by"`
+	CreatedAt time.Time `gorm:"column:created_at" json:"created_at"`
+	CreatedBy uint      `gorm:"column:created_by" json:"created_by"`
+	UpdatedAt time.Time `gorm:"column:updated_at" json:"updated_at"`
+	UpdatedBy uint      `gorm:"column:updated_by" json:"updated_by"`
 	Deleted   bool      `gorm:"default:false" json:"deleted"`
 
-	Role    *rol.Role `gorm:"foreignKey:RoleID" json:"role,omitempty"`
-	Creator *User     `gorm:"foreignKey:CreatedBy" json:"creator,omitempty"`
-	Updater *User     `gorm:"foreignKey:UpdatedBy" json:"updater,omitempty"`
+	Role *rol.Role `gorm:"foreignKey:RoleID" json:"role,omitempty"`
 }
 
 // Getters

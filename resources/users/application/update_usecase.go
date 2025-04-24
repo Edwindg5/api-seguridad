@@ -10,16 +10,21 @@ import (
 )
 
 type UpdateUserUseCase struct {
-	userRepo repository.UserRepository
+	UserRepo repository.UserRepository // Cambiado a exportado (con mayúscula)
 }
 
 func NewUpdateUserUseCase(userRepo repository.UserRepository) *UpdateUserUseCase {
-	return &UpdateUserUseCase{userRepo: userRepo}
+	return &UpdateUserUseCase{UserRepo: userRepo}
+}
+
+// GetUserRepo permite acceder al repositorio (opcional)
+func (uc *UpdateUserUseCase) GetUserRepo() repository.UserRepository {
+	return uc.UserRepo
 }
 
 func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, updaterID uint) error {
 	// Validar que el usuario exista
-	existingUser, err := uc.userRepo.GetByID(ctx, user.ID)
+	existingUser, err := uc.UserRepo.GetByID(ctx, user.ID)
 	if err != nil {
 		return err
 	}
@@ -29,31 +34,24 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, u
 
 	// Validar campos únicos si han cambiado
 	if user.Username != existingUser.Username {
-		if existing, err := uc.userRepo.GetByUsername(ctx, user.Username); err == nil && existing != nil {
+		if existing, err := uc.UserRepo.GetByUsername(ctx, user.Username); err == nil && existing != nil {
 			return errors.New("new username already exists")
 		}
 	}
 
 	if user.Email != existingUser.Email {
-		if existing, err := uc.userRepo.GetByEmail(ctx, user.Email); err == nil && existing != nil {
+		if existing, err := uc.UserRepo.GetByEmail(ctx, user.Email); err == nil && existing != nil {
 			return errors.New("new email already exists")
 		}
 	}
 
-	// Actualizar campos
-	existingUser.FirstName = user.FirstName
-	existingUser.LastName = user.LastName
-	existingUser.Username = user.Username
-	existingUser.Email = user.Email
+	// Preparar datos para actualización
+	user.UpdatedAt = time.Now()
+	user.UpdatedBy = updaterID
 	
-	// Actualizar contraseña solo si se proporcionó una nueva
-	if user.Password != "" {
-		existingUser.Password = user.Password
-	}
+	// No actualizar created_at y created_by
+	user.CreatedAt = existingUser.CreatedAt
+	user.CreatedBy = existingUser.CreatedBy
 
-	existingUser.RoleID = user.RoleID
-	existingUser.UpdatedAt = time.Now()
-	existingUser.UpdatedBy = updaterID
-
-	return uc.userRepo.Update(ctx, existingUser)
+	return uc.UserRepo.Update(ctx, user)
 }

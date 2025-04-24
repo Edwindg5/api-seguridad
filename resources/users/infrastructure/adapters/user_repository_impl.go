@@ -34,14 +34,11 @@ func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) er
     
     return r.db.WithContext(ctx).Create(user).Error
 }
-
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.User, error) {
     var user entities.User
     err := r.db.WithContext(ctx).
         Preload("Role").
-        Preload("Creator").
-        Preload("Updater").
-        Where("id_user = ? AND deleted = ?", id, false). // Cambiado de "id" a "id_user"
+        Where("id_user = ? AND deleted = ?", id, false).
         First(&user).Error
     
     if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -49,6 +46,7 @@ func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Us
     }
     return &user, err
 }
+
 
 func (r *UserRepositoryImpl) GetByUsername(ctx context.Context, username string) (*entities.User, error) {
 	var user entities.User
@@ -75,9 +73,37 @@ func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 }
 
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
-	return r.db.WithContext(ctx).Save(user).Error
-}
+    // Obtener usuario existente
+    existingUser, err := r.GetByID(ctx, user.ID)
+    if err != nil {
+        return err
+    }
+    if existingUser == nil {
+        return errors.New("user not found")
+    }
 
+    // Actualizar solo campos permitidos
+    existingUser.FirstName = user.FirstName
+    existingUser.LastName = user.LastName
+    existingUser.Username = user.Username
+    existingUser.Email = user.Email
+    existingUser.RoleID = user.RoleID
+    
+    // Actualizar contraseña solo si se proporcionó una nueva
+    if user.Password != "" {
+        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+        if err != nil {
+            return err
+        }
+        existingUser.Password = string(hashedPassword)
+    }
+
+    // Mantener campos de auditoría originales
+    user.CreatedAt = existingUser.CreatedAt
+    user.CreatedBy = existingUser.CreatedBy
+
+    return r.db.WithContext(ctx).Omit("created_by", "updated_by").Save(user).Error
+}
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint, deleterID uint) error {
 	return r.db.WithContext(ctx).
 		Model(&entities.User{}).

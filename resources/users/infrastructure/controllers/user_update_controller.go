@@ -1,3 +1,4 @@
+// api-seguridad/resources/users/infrastructure/controllers/user_update_controller.go
 package controllers
 
 import (
@@ -47,7 +48,7 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Convertir updaterID a uint de forma segura
+	// Convertir updaterID a uint
 	var updater uint
 	switch v := updaterID.(type) {
 	case uint:
@@ -75,5 +76,12 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "User updated successfully", user)
+	// Obtener usuario actualizado para la respuesta usando el método público
+	updatedUser, err := c.updateUC.UserRepo.GetByID(ctx.Request.Context(), user.ID)
+	if err != nil {
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to get updated user", err)
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "User updated successfully", updatedUser)
 }
