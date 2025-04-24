@@ -4,6 +4,7 @@ package application
 import (
 	"context"
 	"errors"
+	"time"
 	"api-seguridad/resources/roles/domain/entities"
 	"api-seguridad/resources/roles/domain/repository"
 )
@@ -32,19 +33,20 @@ func (uc *UpdateRoleUseCase) Execute(ctx context.Context, role *entities.Role) e
 		return errors.New("role not found")
 	}
 
-	// Verificar unicidad del título solo si está cambiando
 	if existingRole.Title != role.Title {
-		// Obtener todos los roles y verificar si el nuevo título ya existe
-		roles, err := uc.roleRepo.GetAll(ctx)
-		if err != nil {
-			return err
-		}
-		for _, r := range roles {
-			if r.Title == role.Title && !r.IsDeleted() {
-				return errors.New("role with this title already exists")
-			}
+		if existing, err := uc.roleRepo.GetByTitle(ctx, role.Title); err == nil && existing != nil && !existing.IsDeleted() {
+			return errors.New("role with this title already exists")
 		}
 	}
 
+	role.CreatedAt = existingRole.CreatedAt
+	role.CreatedBy = existingRole.CreatedBy
+	role.UpdatedAt = time.Now()
+
 	return uc.roleRepo.Update(ctx, role)
+}
+
+// Getter para acceder al repositorio
+func (uc *UpdateRoleUseCase) GetRepository() repository.RoleRepository {
+	return uc.roleRepo
 }

@@ -1,4 +1,4 @@
-//api-seguridad/resources/police/infrastructure/dependencies/dependencies.go
+// api-seguridad/resources/police/infrastructure/dependencies/dependencies.go
 package dependencies
 
 import (

@@ -13,5 +13,6 @@ type RoleRepository interface {
 	GetAll(ctx context.Context) ([]*entities.Role, error)
 	Update(ctx context.Context, role *entities.Role) error
 	SoftDelete(ctx context.Context, id uint) error
+	GetByTitle(ctx context.Context, title string) (*entities.Role, error)
 	
 }

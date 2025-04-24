@@ -19,7 +19,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure API routes
 	policeRoutes := router.Group("/police")
-	{
+	{	
 		// CRUD endpoints
 		policeRoutes.POST("", createCtrl.Handle)          // Create new police record
 		policeRoutes.GET("", getAllCtrl.Handle)           // Get all police records

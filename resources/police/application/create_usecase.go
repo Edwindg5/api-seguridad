@@ -17,24 +17,30 @@ func NewCreatePoliceUseCase(repo repository.PoliceRepository) *CreatePoliceUseCa
 }
 
 func (uc *CreatePoliceUseCase) Execute(ctx context.Context, police *entities.Police) error {
-	if police.Name == "" || police.PaternalName == "" {
-		return errors.New("name and paternal lastname are required")
-	}
-	if police.CUIP == "" {
-		return errors.New("CUIP is required")
-	}
-	if police.Sex != "M" && police.Sex != "F" {
-		return errors.New("invalid sex, must be M or F")
-	}
+    // Validaciones básicas
+    if police.Name == "" || police.PaternalName == "" {
+        return errors.New("name and paternal lastname are required")
+    }
+    if police.CUIP == "" {
+        return errors.New("CUIP is required")
+    }
+    if police.Sex != "M" && police.Sex != "F" {
+        return errors.New("invalid sex, must be M or F")
+    }
 
-	// Check CUIP uniqueness
-	existing, err := uc.repo.GetByCUIP(ctx, police.CUIP)
-	if err != nil {
-		return err
-	}
-	if existing != nil {
-		return errors.New("police with this CUIP already exists")
-	}
+    // Verificar que el usuario creador exista
+    if police.CreatedBy == 0 {
+        return errors.New("creator user does not exist")
+    }
 
-	return uc.repo.Create(ctx, police)
+    // Check CUIP uniqueness
+    existing, err := uc.repo.GetByCUIP(ctx, police.CUIP)
+    if err != nil {
+        return err
+    }
+    if existing != nil {
+        return errors.New("police with this CUIP already exists")
+    }
+
+    return uc.repo.Create(ctx, police)
 }

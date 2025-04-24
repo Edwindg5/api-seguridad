@@ -14,7 +14,7 @@ type Police struct {
 	MaternalName  string    `gorm:"column:maternal_lastname;size:50" json:"maternal_lastname"`
 	TypePoliceID  uint      `gorm:"column:id_type_police_fk;not null" json:"type_police_id"`
 	Sex           string    `gorm:"size:1;not null" json:"sex"`
-	CUIP          string    `gorm:"size:50;unique;not null" json:"cuip"`
+    CUIP string `gorm:"column:c_ui_p;size:50;unique;not null" json:"cuip"`
 	RFC           string    `gorm:"size:20" json:"rfc"`
 	CreatedAt     time.Time `gorm:"autoCreateTime;column:created_at" json:"created_at"`
 	CreatedBy     uint      `gorm:"column:created_by" json:"created_by"`

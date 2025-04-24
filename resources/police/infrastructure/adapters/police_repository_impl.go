@@ -1,11 +1,13 @@
-//api-seguridad/resources/police/infrastructure/adapters/police_repository_impl.go
+// api-seguridad/resources/police/infrastructure/adapters/police_repository_impl.go
 package adapters
 
 import (
-	"context"
-	"errors"
 	"api-seguridad/resources/police/domain/entities"
 	"api-seguridad/resources/police/domain/repository"
+	"context"
+	"errors"
+	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -18,9 +20,16 @@ func NewPoliceRepository(db *gorm.DB) repository.PoliceRepository {
 }
 
 func (r *PoliceRepositoryImpl) Create(ctx context.Context, police *entities.Police) error {
-	return r.db.WithContext(ctx).Create(police).Error
+    // Asegurar que los campos de auditoría estén establecidos
+    if police.CreatedAt.IsZero() {
+        police.CreatedAt = time.Now()
+    }
+    if police.UpdatedAt.IsZero() {
+        police.UpdatedAt = time.Now()
+    }
+    
+    return r.db.WithContext(ctx).Create(police).Error
 }
-
 func (r *PoliceRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Police, error) {
 	var police entities.Police
 	err := r.db.WithContext(ctx).
@@ -48,7 +57,7 @@ func (r *PoliceRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Police, 
 func (r *PoliceRepositoryImpl) GetByCUIP(ctx context.Context, cuip string) (*entities.Police, error) {
 	var police entities.Police
 	err := r.db.WithContext(ctx).
-		Where("cuip = ? AND deleted = ?", cuip, false).
+		Where("c_ui_p = ? AND deleted = ?", cuip, false).
 		Preload("TypePolice").
 		First(&police).Error
 		

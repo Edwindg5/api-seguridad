@@ -18,23 +18,33 @@ func NewCreatePoliceController(useCase *application.CreatePoliceUseCase) *Create
 }
 
 func (c *CreatePoliceController) Handle(ctx *gin.Context) {
-	var police entities.Police
-	if err := ctx.ShouldBindJSON(&police); err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
-		return
-	}
+    var police entities.Police
+    if err := ctx.ShouldBindJSON(&police); err != nil {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
+        return
+    }
 
-	if err := c.useCase.Execute(ctx.Request.Context(), &police); err != nil {
-		status := http.StatusInternalServerError
-		switch err.Error() {
-		case "name and paternal lastname are required", "CUIP is required", "invalid sex, must be M or F":
-			status = http.StatusBadRequest
-		case "police with this CUIP already exists":
-			status = http.StatusConflict
-		}
-		utils.ErrorResponse(ctx, status, err.Error(), nil)
-		return
-	}
+    // Obtener ID del usuario que realiza la creación
+    if creatorID, exists := ctx.Get("userID"); exists {
+        if uid, ok := creatorID.(uint); ok {
+            police.CreatedBy = uid
+			police.UpdatedBy = uid 
+        }
+    }
 
-	utils.SuccessResponse(ctx, http.StatusCreated, "Police created successfully", police)
+    if err := c.useCase.Execute(ctx.Request.Context(), &police); err != nil {
+        status := http.StatusInternalServerError
+        switch err.Error() {
+        case "name and paternal lastname are required", "CUIP is required", "invalid sex, must be M or F":
+            status = http.StatusBadRequest
+        case "police with this CUIP already exists":
+            status = http.StatusConflict
+        case "creator user does not exist":
+            status = http.StatusBadRequest
+        }
+        utils.ErrorResponse(ctx, status, err.Error(), nil)
+        return
+    }
+
+    utils.SuccessResponse(ctx, http.StatusCreated, "Police created successfully", police)
 }

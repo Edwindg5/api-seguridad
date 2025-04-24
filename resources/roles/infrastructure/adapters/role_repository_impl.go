@@ -37,13 +37,31 @@ func (r *RoleRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Role, erro
 	err := r.db.WithContext(ctx).Where("deleted = ?", false).Find(&roles).Error
 	return roles, err
 }
+func (r *RoleRepositoryImpl) GetByTitle(ctx context.Context, title string) (*entities.Role, error) {
+	var role entities.Role
+	err := r.db.WithContext(ctx).
+		Where("title_rol = ? AND deleted = ?", title, false).
+		First(&role).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &role, err
+}
 
 func (r *RoleRepositoryImpl) Update(ctx context.Context, role *entities.Role) error {
-	return r.db.WithContext(ctx).Save(role).Error
+	return r.db.WithContext(ctx).Model(role).
+		Updates(map[string]interface{}{
+			"title_rol":    role.Title,
+			"description":  role.Description,
+			"updated_by":   role.UpdatedBy,
+			"updated_at":   role.UpdatedAt,
+			"deleted":      role.Deleted,
+		}).Error
 }
 
 func (r *RoleRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).Model(&entities.Role{}).
-		Where("id = ?", id).
+		Where("id_rol = ?", id).
 		Update("deleted", true).Error
 }
+
