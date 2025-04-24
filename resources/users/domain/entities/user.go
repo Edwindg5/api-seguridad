@@ -21,6 +21,8 @@ type User struct {
 	Deleted   bool      `gorm:"default:false" json:"deleted"`
 
 	Role *rol.Role `gorm:"foreignKey:RoleID" json:"role,omitempty"`
+	Creator *User     `gorm:"foreignKey:CreatedBy" json:"creator,omitempty"`
+    Updater *User     `gorm:"foreignKey:UpdatedBy" json:"updater,omitempty"`
 }
 
 // Getters

@@ -19,7 +19,7 @@ func NewUserDeleteController(deleteUC *application.DeleteUserUseCase) *UserDelet
 }
 
 func (c *UserDeleteController) Handle(ctx *gin.Context) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
 	if err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", err)
 		return

@@ -17,7 +17,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	// Obtener dependencias
 	userRepo := dependencies.GetUserRepository()
 	
-	// Inicializar casos de uso
+	// Inicializar casos de uso y controladores
 	createUC := application.NewCreateUserUseCase(userRepo)
 	getByIDUC := application.NewGetUserByIDUseCase(userRepo)
 	updateUC := application.NewUpdateUserUseCase(userRepo)
@@ -26,7 +26,6 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	getByUsernameUC := application.NewGetUserByUsernameUseCase(userRepo)
 	getByEmailUC := application.NewGetUserByEmailUseCase(userRepo)
 
-	// Inicializar controladores
 	createCtrl := controllers.NewUserCreateController(createUC)
 	getByIDCtrl := controllers.NewUserGetByIDController(getByIDUC)
 	updateCtrl := controllers.NewUserUpdateController(updateUC)
@@ -35,20 +34,23 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	getByUsernameCtrl := controllers.NewUserGetByUsernameController(getByUsernameUC)
 	getByEmailCtrl := controllers.NewUserGetByEmailController(getByEmailUC)
 
-	// Configurar rutas con middleware de autenticación
+	// Configurar rutas
 	userRoutes := router.Group("/users")
-	userRoutes.Use(middleware.AuthMiddleware())
 	{
-		// CRUD básico
-		userRoutes.POST("", createCtrl.Handle)
-		userRoutes.GET("", listCtrl.Handle)
-		userRoutes.GET("/:id_user", getByIDCtrl.Handle)
-		userRoutes.PUT("/:id_user", updateCtrl.Handle)
-		userRoutes.DELETE("/:id_user", deleteCtrl.Handle)
+		// Ruta PÚBLICA (sin autenticación)
+		userRoutes.GET("", listCtrl.Handle)  // Listar usuarios (acceso público)
 
-		// Rutas adicionales
-		userRoutes.GET("/username/:username", getByUsernameCtrl.Handle)
-		userRoutes.GET("/email/:email", getByEmailCtrl.Handle)
+		// Rutas PROTEGIDAS (requieren autenticación)
+		protectedRoutes := userRoutes.Group("")
+		protectedRoutes.Use(middleware.AuthMiddleware())  // Middleware aplicado solo a estas rutas
+		{
+			protectedRoutes.POST("", createCtrl.Handle)
+			protectedRoutes.GET("/:id_user", getByIDCtrl.Handle)
+			protectedRoutes.PUT("/:id_user", updateCtrl.Handle)
+			protectedRoutes.DELETE("/:id_user", deleteCtrl.Handle)
+			protectedRoutes.GET("/username/:username", getByUsernameCtrl.Handle)
+			protectedRoutes.GET("/email/:email", getByEmailCtrl.Handle)
+		}
 	}
 
 	// Ruta especial sin autenticación para crear admin inicial
