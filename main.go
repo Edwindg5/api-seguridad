@@ -14,6 +14,8 @@ import (
 	roleroutes "api-seguridad/resources/roles/infrastructure/routes"
 	userdeps "api-seguridad/resources/users/infrastructure/dependencies"
 	userroutes "api-seguridad/resources/users/infrastructure/routes"
+	typepolicedeps "api-seguridad/resources/type_police/infrastructure/dependencies"
+	typepoliceroutes "api-seguridad/resources/type_police/infrastructure/routes"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +31,9 @@ func main() {
 	policedeps.InitDependencies()
 	municipaldeps.InitDependencies()
 	delegationdeps.InitDependencies() // Añadir esta línea
+	typepolicedeps.InitDependencies()
+
+
 
 	// Crear router
 	router := gin.Default()
@@ -41,6 +46,7 @@ func main() {
 		policeroutes.ConfigureRoutes(api)
 		municipalroutes.ConfigureRoutes(api)
 		delegationroutes.ConfigureRoutes(api) // Añadir esta línea
+		typepoliceroutes.ConfigureRoutes(api)
 	}
 
 	// Iniciar servidor
