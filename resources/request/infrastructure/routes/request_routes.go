@@ -2,13 +2,14 @@
 package routes
 
 import (
+	"api-seguridad/core/middleware"
 	"api-seguridad/resources/request/infrastructure/controllers"
 	"api-seguridad/resources/request/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
-	// Initialize controllers with injected use cases
+	// Initialize controllers
 	createCtrl := controllers.NewCreateRequestController(dependencies.GetCreateRequestUseCase())
 	getByIdCtrl := controllers.NewGetRequestByIDController(dependencies.GetRequestByIDUseCase())
 	updateCtrl := controllers.NewUpdateRequestController(dependencies.GetUpdateRequestUseCase())
@@ -16,17 +17,18 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	getByStatusCtrl := controllers.NewGetRequestsByStatusController(dependencies.GetRequestsByStatusUseCase())
 	getByMunicipalityCtrl := controllers.NewGetRequestsByMunicipalityController(dependencies.GetRequestsByMunicipalityUseCase())
 
-	// Configure API routes
+	// Configure API routes with authentication
 	requestRoutes := router.Group("/requests")
+	requestRoutes.Use(middleware.AuthMiddleware()) // Middleware aplicado a todas las rutas
 	{
 		// CRUD endpoints
-		requestRoutes.POST("", createCtrl.Handle)              // Create new request
-		requestRoutes.GET("/:id", getByIdCtrl.Handle)         // Get request by ID
-		requestRoutes.PUT("/:id", updateCtrl.Handle)          // Update request
-		requestRoutes.DELETE("/:id", deleteCtrl.Handle)       // Delete request
+		requestRoutes.POST("", createCtrl.Handle)
+		requestRoutes.GET("/:id", getByIdCtrl.Handle)
+		requestRoutes.PUT("/:id", updateCtrl.Handle)
+		requestRoutes.DELETE("/:id", deleteCtrl.Handle)
 
 		// Specialized endpoints
-		requestRoutes.GET("/status", getByStatusCtrl.Handle)       // Get requests by status
-		requestRoutes.GET("/municipality", getByMunicipalityCtrl.Handle) // Get requests by municipality
+		requestRoutes.GET("/status", getByStatusCtrl.Handle)
+		requestRoutes.GET("/municipality", getByMunicipalityCtrl.Handle)
 	}
 }

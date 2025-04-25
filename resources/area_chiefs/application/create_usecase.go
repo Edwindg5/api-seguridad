@@ -29,11 +29,15 @@ func (uc *CreateAreaChiefUseCase) Execute(ctx context.Context, chief *entities.A
 		return errors.New("creator user is required")
 	}
 
-	// Set timestamps
+	// Set default values
+	if chief.Type == "" {
+		chief.Type = "Regular" // Valor por defecto
+	}
 	if chief.CreatedAt.IsZero() {
 		chief.CreatedAt = time.Now()
 	}
 	chief.UpdatedAt = time.Now()
+	chief.Deleted = false
 
 	return uc.repo.Create(ctx, chief)
 }

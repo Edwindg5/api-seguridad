@@ -7,19 +7,18 @@ import (
 )
 
 type RequestStatus struct {
-	ID          uint      `gorm:"primaryKey;column:id_status" json:"id"`
-	Name        string    `gorm:"size:100;unique;not null" json:"name"`
-	Description string    `gorm:"type:text" json:"description"`
-	CreatedAt   time.Time `gorm:"column:created_at" json:"created_at"`
-	CreatedBy   uint      `gorm:"column:created_by" json:"created_by"`
-	UpdatedBy   uint      `gorm:"column:updated_by" json:"updated_by"`
-	UpdatedAt   time.Time `gorm:"column:updated_at" json:"updated_at"`
-	Deleted     bool      `gorm:"default:false;column:deleted" json:"deleted"`
+    ID          uint      `gorm:"primaryKey;column:id_status" json:"id"`
+    Name        string    `gorm:"size:100;unique;not null" json:"name"`
+    Description string    `gorm:"type:text" json:"description"`
+    CreatedAt   time.Time `gorm:"column:created_at" json:"created_at"`
+    CreatedBy   uint      `gorm:"column:created_by" json:"created_by"`
+    UpdatedBy   uint      `gorm:"column:updated_by" json:"updated_by"`
+    UpdatedAt   time.Time `gorm:"column:updated_at" json:"updated_at"`
+    Deleted     bool      `gorm:"default:false;column:deleted" json:"deleted"`
 
-	CreatedByUser *entityusers.User `gorm:"foreignKey:CreatedBy" json:"created_by_user,omitempty"`
-	UpdatedByUser *entityusers.User `gorm:"foreignKey:UpdatedBy" json:"updated_by_user,omitempty"`
+    CreatedByUser *entityusers.User `gorm:"foreignKey:CreatedBy;references:id_user" json:"created_by_user,omitempty"`
+    UpdatedByUser *entityusers.User `gorm:"foreignKey:UpdatedBy;references:id_user" json:"updated_by_user,omitempty"`
 }
-
 // Getters
 func (rs *RequestStatus) GetID() uint {
 	return rs.ID

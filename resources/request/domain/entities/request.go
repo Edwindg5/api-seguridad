@@ -10,35 +10,34 @@ import (
 )
 
 type Request struct {
-	ID                      uint      `gorm:"primaryKey;column:id_request" json:"id"`
-	ReceiptDate             time.Time `gorm:"column:receipt_date" json:"receipt_date"`
-	OfficeNumber           string    `gorm:"column:office_number;size:100" json:"office_number"`
-	SignatureName          string    `gorm:"column:signature_name;size:255" json:"signature_name"`
-	MunicipalitiesID       uint      `gorm:"column:id_municipalities_fk" json:"municipalities_id"`
-	NumberPost             int       `gorm:"column:number_post" json:"number_post"`
-	StatusID               uint      `gorm:"column:id_status_fk" json:"status_id"`
-	Date                   time.Time `gorm:"column:date" json:"date"`
-	NumberOfLettersDelivered int     `gorm:"column:number_of_letters_delivered" json:"number_of_letters_delivered"`
-	DeliveryName           string    `gorm:"column:delivery_name;size:255" json:"delivery_name"`
-	ReceiveName            string    `gorm:"column:receive_name;size:255" json:"receive_name"`
-	DepartmentArea         string    `gorm:"column:department_area;size:100" json:"department_area"`
-	Phone                  string    `gorm:"column:phone;size:20" json:"phone"`
-	CeoChiefID             uint      `gorm:"column:ceo_chief_id" json:"ceo_chief_id"`
-	LegalChiefID           uint      `gorm:"column:legal_chief_id" json:"legal_chief_id"`
-	CreatedAt              time.Time `gorm:"column:created_at" json:"created_at"`
-	CreatedBy              uint      `gorm:"column:created_by" json:"created_by"`
-	UpdatedBy              uint      `gorm:"column:updated_by" json:"updated_by"`
-	UpdatedAt              time.Time `gorm:"column:updated_at" json:"updated_at"`
-	Deleted                bool      `gorm:"column:deleted" json:"deleted"`
+    ID                      uint      `gorm:"primaryKey;column:id_request" json:"id"`
+    ReceiptDate             time.Time `gorm:"column:receipt_date" json:"receipt_date"`
+    OfficeNumber           string    `gorm:"column:office_number;size:100" json:"office_number"`
+    SignatureName          string    `gorm:"column:signature_name;size:255" json:"signature_name"`
+    MunicipalitiesID       uint      `gorm:"column:id_municipalities_fk" json:"municipalities_id"`
+    NumberPost             int       `gorm:"column:number_post" json:"number_post"`
+    StatusID               uint      `gorm:"column:id_status_fk" json:"status_id"`
+    Date                   time.Time `gorm:"column:date" json:"date"`
+    NumberOfLettersDelivered int     `gorm:"column:number_of_letters_delivered" json:"number_of_letters_delivered"`
+    DeliveryName           string    `gorm:"column:delivery_name;size:255" json:"delivery_name"`
+    ReceiveName            string    `gorm:"column:receive_name;size:255" json:"receive_name"`
+    DepartmentArea         string    `gorm:"column:department_area;size:100" json:"department_area"`
+    Phone                  string    `gorm:"column:phone;size:20" json:"phone"`
+    CeoChiefID             uint      `gorm:"column:ceo_chief_id" json:"ceo_chief_id"`
+    LegalChiefID           uint      `gorm:"column:legal_chief_id" json:"legal_chief_id"`
+    CreatedAt              time.Time `gorm:"column:created_at" json:"created_at"`
+    CreatedBy              uint      `gorm:"column:created_by" json:"created_by"`
+    UpdatedBy              uint      `gorm:"column:updated_by" json:"updated_by"`
+    UpdatedAt              time.Time `gorm:"column:updated_at" json:"updated_at"`
+    Deleted                bool      `gorm:"column:deleted" json:"deleted"`
 
-	Municipalities *entitymunicipalities.Municipality `gorm:"foreignKey:MunicipalitiesID" json:"municipalities,omitempty"`
-	Status         *entitystatus.RequestStatus          `gorm:"foreignKey:StatusID" json:"status,omitempty"`
-	CeoChief       *entitychiefs.AreaChief           `gorm:"foreignKey:CeoChiefID" json:"ceo_chief,omitempty"`
-	LegalChief     *entitychiefs.AreaChief             `gorm:"foreignKey:LegalChiefID" json:"legal_chief,omitempty"`
-	CreatedByUser  *entityusers.User                   `gorm:"foreignKey:CreatedBy" json:"created_by_user,omitempty"`
-	UpdatedByUser  *entityusers.User                   `gorm:"foreignKey:UpdatedBy" json:"updated_by_user,omitempty"`
+    Municipalities *entitymunicipalities.Municipality `gorm:"foreignKey:MunicipalitiesID;references:id_municipalities" json:"municipalities,omitempty"`
+    Status         *entitystatus.RequestStatus        `gorm:"foreignKey:StatusID;references:id_status" json:"status,omitempty"`
+    CeoChief       *entitychiefs.AreaChief           `gorm:"foreignKey:CeoChiefID;references:id_official" json:"ceo_chief,omitempty"`
+    LegalChief     *entitychiefs.AreaChief           `gorm:"foreignKey:LegalChiefID;references:id_official" json:"legal_chief,omitempty"`
+    CreatedByUser  *entityusers.User                 `gorm:"foreignKey:CreatedBy;references:id_user" json:"created_by_user,omitempty"`
+    UpdatedByUser  *entityusers.User                 `gorm:"foreignKey:UpdatedBy;references:id_user" json:"updated_by_user,omitempty"`
 }
-
 // Getters
 func (r *Request) GetID() uint {
 	return r.ID

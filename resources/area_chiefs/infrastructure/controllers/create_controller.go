@@ -24,12 +24,20 @@ func (c *CreateAreaChiefController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Set creator user from context
-	if creatorID, exists := ctx.Get("userID"); exists {
-		if uid, ok := creatorID.(uint); ok {
-			chief.CreatedBy = uid
-			chief.UpdatedBy = uid
-		}
+	// Obtener userID del contexto de autenticación
+	userID, exists := ctx.Get("userID")
+	if !exists {
+		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
+		return
+	}
+
+	// Convertir y asignar el userID
+	if uid, ok := userID.(uint); ok {
+		chief.CreatedBy = uid
+		chief.UpdatedBy = uid
+	} else {
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Invalid user ID in context", nil)
+		return
 	}
 
 	if err := c.useCase.Execute(ctx.Request.Context(), &chief); err != nil {

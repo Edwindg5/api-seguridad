@@ -32,21 +32,21 @@ func (r *RequestRepositoryImpl) Create(ctx context.Context, request *entities.Re
 }
 
 func (r *RequestRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Request, error) {
-	var request entities.Request
-	err := r.db.WithContext(ctx).
-		Where("id_request = ? AND deleted = ?", id, false).
-		Preload("Municipalities").
-		Preload("Status").
-		Preload("CeoChief").
-		Preload("LegalChief").
-		Preload("CreatedByUser").
-		Preload("UpdatedByUser").
-		First(&request).Error
-		
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	return &request, err
+    var request entities.Request
+    err := r.db.WithContext(ctx).
+        Where("id_request = ? AND deleted = ?", id, false).
+        Preload("Municipalities").
+        Preload("Status").
+        Preload("CeoChief").
+        Preload("LegalChief").
+        Preload("CreatedByUser").
+        Preload("UpdatedByUser").
+        First(&request).Error
+        
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return nil, nil
+    }
+    return &request, err
 }
 
 func (r *RequestRepositoryImpl) Update(ctx context.Context, request *entities.Request) error {

@@ -7,19 +7,19 @@ import (
 )
 
 type AreaChief struct {
-	ID           uint      `gorm:"primaryKey;column:id_official" json:"id"`
-	Name         string    `gorm:"column:name_official;size:50" json:"name"`
-	Position     string    `gorm:"size:50" json:"position"`
-	Type         string    `gorm:"size:50" json:"type"`
-	SignaturePath string   `gorm:"column:signature_path;size:100" json:"signature_path"`
-	CreatedAt    time.Time `gorm:"column:created_at" json:"created_at"`
-	CreatedBy    uint      `gorm:"column:created_by" json:"created_by"`
-	UpdatedBy    uint      `gorm:"column:updated_by" json:"updated_by"`
-	UpdatedAt    time.Time `gorm:"column:updated_at" json:"updated_at"`
-	Deleted      bool      `gorm:"default:false;column:deleted" json:"deleted"`
+    ID           uint      `gorm:"primaryKey;column:id_official" json:"id"`
+    Name         string    `gorm:"column:name_official;size:50" json:"name"`
+    Position     string    `gorm:"size:50" json:"position"`
+    Type         string    `gorm:"size:50" json:"type"`
+    SignaturePath string   `gorm:"column:signature_path;size:100" json:"signature_path"`
+    CreatedAt    time.Time `gorm:"column:created_at" json:"created_at"`
+    CreatedBy    uint      `gorm:"column:created_by" json:"created_by"`
+    UpdatedBy    uint      `gorm:"column:updated_by" json:"updated_by"`
+    UpdatedAt    time.Time `gorm:"column:updated_at" json:"updated_at"`
+    Deleted      bool      `gorm:"default:false;column:deleted" json:"deleted"`
 
-	CreatedByUser *entityusers.User `gorm:"foreignKey:CreatedBy" json:"created_by_user,omitempty"`
-	UpdatedByUser *entityusers.User `gorm:"foreignKey:UpdatedBy" json:"updated_by_user,omitempty"`
+    CreatedByUser *entityusers.User `gorm:"foreignKey:CreatedBy;references:id_user" json:"created_by_user,omitempty"`
+    UpdatedByUser *entityusers.User `gorm:"foreignKey:UpdatedBy;references:id_user" json:"updated_by_user,omitempty"`
 }
 
 // Getters

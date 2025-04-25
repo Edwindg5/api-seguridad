@@ -68,8 +68,13 @@ func (r *RequestStatusRepositoryImpl) GetByName(ctx context.Context, name string
 }
 
 func (r *RequestStatusRepositoryImpl) Update(ctx context.Context, status *entities.RequestStatus) error {
-	status.UpdatedAt = time.Now()
-	return r.db.WithContext(ctx).Save(status).Error
+    return r.db.WithContext(ctx).Model(status).
+        Updates(map[string]interface{}{
+            "name":        status.Name,
+            "description": status.Description,
+            "updated_by":  status.UpdatedBy,
+            "updated_at":  time.Now(),
+        }).Error
 }
 
 func (r *RequestStatusRepositoryImpl) Delete(ctx context.Context, id uint) error {

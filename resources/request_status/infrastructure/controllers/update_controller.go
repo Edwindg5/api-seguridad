@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/request_status/application"
-	"api-seguridad/resources/request_status/domain/entities"
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,21 +25,36 @@ func (c *UpdateRequestStatusController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var status entities.RequestStatus
-	if err := ctx.ShouldBindJSON(&status); err != nil {
+	// Obtener el estado existente a través del use case
+	existingStatus, err := c.useCase.GetByID(ctx.Request.Context(), uint(id))
+	if err != nil || existingStatus == nil {
+		utils.ErrorResponse(ctx, http.StatusNotFound, "Status not found", err)
+		return
+	}
+
+	// Bind solo los campos actualizables
+	var updateData struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+	}
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	// Set ID from URL and updater user
-	status.ID = uint(id)
+	// Actualizar campos
+	existingStatus.Name = updateData.Name
+	existingStatus.Description = updateData.Description
+	
+	// Establecer usuario actualizador
 	if updaterID, exists := ctx.Get("userID"); exists {
 		if uid, ok := updaterID.(uint); ok {
-			status.UpdatedBy = uid
+			existingStatus.UpdatedBy = uid
 		}
 	}
 
-	if err := c.useCase.Execute(ctx.Request.Context(), &status); err != nil {
+	// Usar el use case para ejecutar la actualización
+	if err := c.useCase.Execute(ctx.Request.Context(), existingStatus); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
 		case "invalid status ID", "status name is required", "updater user is required":
@@ -51,5 +66,5 @@ func (c *UpdateRequestStatusController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Request status updated successfully", status)
+	utils.SuccessResponse(ctx, http.StatusOK, "Request status updated successfully", existingStatus)
 }

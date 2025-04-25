@@ -20,9 +20,9 @@ type User struct {
 	UpdatedBy uint      `gorm:"column:updated_by" json:"updated_by"`
 	Deleted   bool      `gorm:"default:false" json:"deleted"`
 
-	Role *rol.Role `gorm:"foreignKey:RoleID" json:"role,omitempty"`
+	Role    *rol.Role `gorm:"foreignKey:RoleID" json:"role,omitempty"`
 	Creator *User     `gorm:"foreignKey:CreatedBy" json:"creator,omitempty"`
-    Updater *User     `gorm:"foreignKey:UpdatedBy" json:"updater,omitempty"`
+	Updater *User     `gorm:"foreignKey:UpdatedBy" json:"updater,omitempty"`
 }
 
 // Getters
@@ -114,5 +114,3 @@ func (u *User) SetUpdatedBy(updatedBy uint) {
 func (u *User) SetDeleted(deleted bool) {
 	u.Deleted = deleted
 }
-
-

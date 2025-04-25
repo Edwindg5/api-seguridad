@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/request/application"
-	"api-seguridad/resources/request/domain/entities"
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,21 +25,39 @@ func (c *UpdateRequestController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var request entities.Request
-	if err := ctx.ShouldBindJSON(&request); err != nil {
+	// Obtener request existente
+	existingRequest, err := c.useCase.GetByID(ctx.Request.Context(), uint(id))
+	if err != nil || existingRequest == nil {
+		utils.ErrorResponse(ctx, http.StatusNotFound, "Request not found", err)
+		return
+	}
+
+	// Bind solo campos actualizables
+	var updateData struct {
+		OfficeNumber           string `json:"office_number"`
+		NumberOfLettersDelivered int  `json:"number_of_letters_delivered"`
+		DepartmentArea         string `json:"department_area"`
+		Phone                  string `json:"phone"`
+	}
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	// Set ID from URL and updater user
-	request.ID = uint(id)
+	// Actualizar campos permitidos
+	existingRequest.OfficeNumber = updateData.OfficeNumber
+	existingRequest.NumberOfLettersDelivered = updateData.NumberOfLettersDelivered
+	existingRequest.DepartmentArea = updateData.DepartmentArea
+	existingRequest.Phone = updateData.Phone
+
+	// Establecer usuario actualizador
 	if updaterID, exists := ctx.Get("userID"); exists {
 		if uid, ok := updaterID.(uint); ok {
-			request.UpdatedBy = uid
+			existingRequest.UpdatedBy = uid
 		}
 	}
 
-	if err := c.useCase.Execute(ctx.Request.Context(), &request); err != nil {
+	if err := c.useCase.Execute(ctx.Request.Context(), existingRequest); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
 		case "invalid request ID", "office number is required", "updater user is required":
@@ -51,5 +69,5 @@ func (c *UpdateRequestController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Request updated successfully", request)
+	utils.SuccessResponse(ctx, http.StatusOK, "Request updated successfully", existingRequest)
 }

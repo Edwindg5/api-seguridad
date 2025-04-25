@@ -17,6 +17,24 @@ func NewUpdateRequestStatusUseCase(repo repository.RequestStatusRepository) *Upd
 	return &UpdateRequestStatusUseCase{repo: repo}
 }
 
+// Nuevo método para obtener por ID
+func (uc *UpdateRequestStatusUseCase) GetByID(ctx context.Context, id uint) (*entities.RequestStatus, error) {
+	if id == 0 {
+		return nil, errors.New("invalid status ID")
+	}
+
+	status, err := uc.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if status == nil || status.IsDeleted() {
+		return nil, errors.New("status not found")
+	}
+
+	return status, nil
+}
+
 func (uc *UpdateRequestStatusUseCase) Execute(ctx context.Context, status *entities.RequestStatus) error {
 	if status.ID == 0 {
 		return errors.New("invalid status ID")
@@ -28,16 +46,13 @@ func (uc *UpdateRequestStatusUseCase) Execute(ctx context.Context, status *entit
 		return errors.New("updater user is required")
 	}
 
-	// Verify status exists
-	existing, err := uc.repo.GetByID(ctx, status.ID)
+	// Verificar existencia
+	existing, err := uc.GetByID(ctx, status.ID)
 	if err != nil {
 		return err
 	}
-	if existing == nil || existing.IsDeleted() {
-		return errors.New("status not found")
-	}
 
-	// Check name uniqueness if changed
+	// Verificar unicidad del nombre si cambió
 	if existing.Name != status.Name {
 		existingWithName, err := uc.repo.GetByName(ctx, status.Name)
 		if err != nil {
@@ -48,7 +63,7 @@ func (uc *UpdateRequestStatusUseCase) Execute(ctx context.Context, status *entit
 		}
 	}
 
-	// Update timestamp
+	// Actualizar timestamp
 	status.UpdatedAt = time.Now()
 
 	return uc.repo.Update(ctx, status)

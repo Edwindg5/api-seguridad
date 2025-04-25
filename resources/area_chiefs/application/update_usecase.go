@@ -5,9 +5,17 @@ import (
 	"context"
 	"errors"
 	"time"
-	"api-seguridad/resources/area_chiefs/domain/entities"
 	"api-seguridad/resources/area_chiefs/domain/repository"
 )
+
+// AreaChiefUpdate represents the fields that can be updated
+type AreaChiefUpdate struct {
+	ID        uint
+	Name      string
+	Position  string
+	Type      string
+	UpdatedBy uint
+}
 
 type UpdateAreaChiefUseCase struct {
 	repo repository.AreaChiefRepository
@@ -17,19 +25,19 @@ func NewUpdateAreaChiefUseCase(repo repository.AreaChiefRepository) *UpdateAreaC
 	return &UpdateAreaChiefUseCase{repo: repo}
 }
 
-func (uc *UpdateAreaChiefUseCase) Execute(ctx context.Context, chief *entities.AreaChief) error {
-	if chief.ID == 0 {
+func (uc *UpdateAreaChiefUseCase) Execute(ctx context.Context, update *AreaChiefUpdate) error {
+	if update.ID == 0 {
 		return errors.New("invalid chief ID")
 	}
-	if chief.Name == "" {
+	if update.Name == "" {
 		return errors.New("chief name is required")
 	}
-	if chief.UpdatedBy == 0 {
+	if update.UpdatedBy == 0 {
 		return errors.New("updater user is required")
 	}
 
 	// Verify chief exists
-	existing, err := uc.repo.GetByID(ctx, chief.ID)
+	existing, err := uc.repo.GetByID(ctx, update.ID)
 	if err != nil {
 		return err
 	}
@@ -37,8 +45,12 @@ func (uc *UpdateAreaChiefUseCase) Execute(ctx context.Context, chief *entities.A
 		return errors.New("area chief not found")
 	}
 
-	// Update timestamp
-	chief.UpdatedAt = time.Now()
+	// Update only the allowed fields
+	existing.Name = update.Name
+	existing.Position = update.Position
+	existing.Type = update.Type
+	existing.UpdatedBy = update.UpdatedBy
+	existing.UpdatedAt = time.Now()
 
-	return uc.repo.Update(ctx, chief)
+	return uc.repo.Update(ctx, existing)
 }

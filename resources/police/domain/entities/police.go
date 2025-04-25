@@ -26,7 +26,6 @@ type Police struct {
 	CreatedByUser *entityusers.User            `gorm:"foreignKey:CreatedBy" json:"created_by_user,omitempty"`
 	UpdatedByUser *entityusers.User            `gorm:"foreignKey:UpdatedBy" json:"updated_by_user,omitempty"`
 }
-
 // Getters
 func (p *Police) GetID() uint {
 	return p.ID

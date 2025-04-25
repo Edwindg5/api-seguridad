@@ -2,6 +2,7 @@
 package routes
 
 import (
+	"api-seguridad/core/middleware"
 	"api-seguridad/resources/area_chiefs/infrastructure/controllers"
 	"api-seguridad/resources/area_chiefs/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
@@ -15,13 +16,14 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	updateCtrl := controllers.NewUpdateAreaChiefController(dependencies.GetUpdateAreaChiefUseCase())
 	deleteCtrl := controllers.NewDeleteAreaChiefController(dependencies.GetDeleteAreaChiefUseCase())
 
-	// Define routes
+	// Define routes with authentication middleware
 	chiefRoutes := router.Group("/area-chiefs")
+	chiefRoutes.Use(middleware.AuthMiddleware()) // Aplicar middleware a todas las rutas de area-chiefs
 	{
-		chiefRoutes.POST("", createCtrl.Handle)          // POST /area-chiefs
-		chiefRoutes.GET("", getAllCtrl.Handle)          // GET /area-chiefs (list all)
-		chiefRoutes.GET("/:id", getByIDCtrl.Handle)     // GET /area-chiefs/:id
-		chiefRoutes.PUT("/:id", updateCtrl.Handle)      // PUT /area-chiefs/:id
-		chiefRoutes.DELETE("/:id", deleteCtrl.Handle)   // DELETE /area-chiefs/:id (soft delete)
+		chiefRoutes.POST("", createCtrl.Handle)
+		chiefRoutes.GET("", getAllCtrl.Handle)
+		chiefRoutes.GET("/:id", getByIDCtrl.Handle)
+		chiefRoutes.PUT("/:id", updateCtrl.Handle)
+		chiefRoutes.DELETE("/:id", deleteCtrl.Handle)
 	}
 }
