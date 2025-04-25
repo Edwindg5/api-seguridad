@@ -1,0 +1,31 @@
+package routes
+
+import (
+	"api-seguridad/resources/role_permissions/infrastructure/controllers"
+	"api-seguridad/resources/role_permissions/infrastructure/dependencies"
+	"github.com/gin-gonic/gin"
+)
+
+func ConfigureRolePermissionRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
+	// Initialize controllers
+	createCtrl := controllers.NewCreateRolePermissionController(dependencies.GetCreateRolePermissionUseCase())
+	getByIdCtrl := controllers.NewGetRolePermissionByIDController(dependencies.GetRolePermissionByIDUseCase())
+	getByRolePermCtrl := controllers.NewGetByRoleAndPermissionController(dependencies.GetByRoleAndPermissionUseCase())
+	getAllByRoleCtrl := controllers.NewGetAllByRoleController(dependencies.GetAllByRoleUseCase())
+	updateCtrl := controllers.NewUpdateRolePermissionController(dependencies.GetUpdateRolePermissionUseCase())
+	deleteCtrl := controllers.NewDeleteRolePermissionController(dependencies.GetDeleteRolePermissionUseCase())	
+
+	// Configure routes
+	rpRoutes := router.Group("/role-permissions")
+	rpRoutes.Use(authMiddleware)
+	{
+		// CRUD endpoints
+		rpRoutes.POST("", createCtrl.Handle)
+		rpRoutes.GET("/:id", getByIdCtrl.Handle)
+		rpRoutes.GET("/check", getByRolePermCtrl.Handle) // ?role_id=X&permission_id=Y
+		rpRoutes.GET("/role/:role_id", getAllByRoleCtrl.Handle)
+		rpRoutes.PUT("/:id", updateCtrl.Handle)
+		rpRoutes.DELETE("/:id", deleteCtrl.Handle)
+		
+	}
+}
