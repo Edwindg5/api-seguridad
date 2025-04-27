@@ -1,3 +1,4 @@
+//api-seguridad/resources/chiefs_periods/domain/entities/chiefs_period.go
 package entities
 
 import (

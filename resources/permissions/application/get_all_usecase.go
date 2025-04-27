@@ -1,3 +1,4 @@
+//api-seguridad/resources/permissions/application/get_all_usecase.go
 package application
 
 import (

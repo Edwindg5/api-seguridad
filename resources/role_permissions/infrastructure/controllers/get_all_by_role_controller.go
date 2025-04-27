@@ -1,3 +1,4 @@
+//api-seguridad/resources/role_permissions/infrastructure/controllers/get_all_by_role_controller.go
 package controllers
 
 import (

@@ -1,3 +1,4 @@
+//api-seguridad/resources/request_details/domain/repository/request_detail_repository.go
 package repository
 
 import (

@@ -1,3 +1,4 @@
+//api-seguridad/resources/permissions/infrastructure/controllers/get_by_id_controller.go
 package controllers
 
 import (

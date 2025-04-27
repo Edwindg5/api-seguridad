@@ -1,3 +1,4 @@
+//api-seguridad/resources/role_permissions/domain/entities/role_permission.go
 package entities
 
 import (

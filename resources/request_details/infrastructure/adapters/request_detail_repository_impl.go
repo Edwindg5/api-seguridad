@@ -1,3 +1,4 @@
+//api-seguridad/resources/request_details/infrastructure/adapters/request_detail_repository_impl.go
 package adapters
 
 import (

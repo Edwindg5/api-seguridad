@@ -1,3 +1,4 @@
+//api-seguridad/resources/chiefs_periods/infrastructure/routes/chiefs_period_routes.go
 package routes
 
 import (

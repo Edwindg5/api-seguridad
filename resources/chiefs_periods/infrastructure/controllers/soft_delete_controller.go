@@ -1,3 +1,4 @@
+//api-seguridad/resources/chiefs_periods/infrastructure/controllers/soft_delete_controller.go
 package controllers
 
 import (

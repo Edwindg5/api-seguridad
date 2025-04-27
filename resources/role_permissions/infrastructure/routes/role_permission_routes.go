@@ -1,3 +1,4 @@
+//api-seguridad/resources/role_permissions/infrastructure/routes/role_permission_routes.go
 package routes
 
 import (

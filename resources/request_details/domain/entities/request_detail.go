@@ -1,3 +1,4 @@
+//api-seguridad/resources/request_details/domain/entities/request_detail.go
 package entities
 
 import (

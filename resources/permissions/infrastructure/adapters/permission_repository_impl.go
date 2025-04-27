@@ -1,3 +1,4 @@
+//api-seguridad/resources/permissions/infrastructure/adapters/permission_repository_impl.go
 package adapters
 
 import (

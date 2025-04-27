@@ -1,3 +1,4 @@
+//api-seguridad/resources/permissions/domain/repository/permission_repository.go
 package repository
 
 import (

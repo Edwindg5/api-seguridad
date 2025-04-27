@@ -1,3 +1,4 @@
+//api-seguridad/resources/role_permissions/application/get_all_by_role_usecase.go
 package application
 
 import (

@@ -1,3 +1,4 @@
+//api-seguridad/resources/request_details/infrastructure/routes/request_detail_routes.go
 package routes
 
 import (

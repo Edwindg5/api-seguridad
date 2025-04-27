@@ -1,3 +1,4 @@
+//api-seguridad/resources/chiefs_periods/infrastructure/adapters/chiefs_period_repository_impl.go
 package adapters
 
 import (

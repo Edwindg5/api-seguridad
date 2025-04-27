@@ -1,3 +1,4 @@
+//api-seguridad/resources/role_permissions/infrastructure/adapters/role_permission_repository_impl.go
 package adapters
 
 import (

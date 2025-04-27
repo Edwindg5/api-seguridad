@@ -1,3 +1,4 @@
+//api-seguridad/resources/chiefs_periods/infrastructure/controllers/get_all_controller.go
 package controllers
 
 import (
