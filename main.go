@@ -1,4 +1,4 @@
-//api-seguridad/main.go
+// api-seguridad/main.go
 package main
 
 import (
@@ -32,6 +32,7 @@ import (
 	role_permissionroutes "api-seguridad/resources/role_permissions/infrastructure/routes"
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -46,16 +47,29 @@ func main() {
 	municipaldeps.InitDependencies()
 	delegationdeps.InitDependencies()
 	typepolicedeps.InitDependencies()
-	areachiefdeps.InitDependencies() // Nueva dependencia
-	requeststatusdeps.InitDependencies() // Nueva dependencia
-	requestdeps.InitDependencies() // Nueva dependencia
-	chiefs_periodsdeps.InitDependencies() // Nueva dependencia
-	request_detailsdeps.InitDependencies() // Nueva dependencia
-	permissionsdeps.InitDependencies() // Nueva dependencia
-	role_permissionsdeps.InitDependencies() // Nueva dependencia
+	areachiefdeps.InitDependencies()
+	requeststatusdeps.InitDependencies()
+	requestdeps.InitDependencies()
+	chiefs_periodsdeps.InitDependencies()
+	request_detailsdeps.InitDependencies()
+	permissionsdeps.InitDependencies()
+	role_permissionsdeps.InitDependencies()
 
 	// Crear router
 	router := gin.Default()
+
+	// Configurar CORS
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"}, // Permitir cualquier origen
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return true
+		},
+		MaxAge: 86400,
+	}))
 
 	// Configurar rutas base
 	api := router.Group("/api/v1")
@@ -66,13 +80,13 @@ func main() {
 		municipalroutes.ConfigureRoutes(api)
 		delegationroutes.ConfigureRoutes(api)
 		typepoliceroutes.ConfigureRoutes(api)
-		areachiefroutes.ConfigureRoutes(api) // Nueva ruta
-		requeststatusroutes.ConfigureRoutes(api) // Nue	va ruta
-		requestroutes.ConfigureRoutes(api) // Nueva ruta
-		chiefs_periodroutes.ConfigureRoutes(api) // Nueva ruta
-		request_detailsroutes.ConfigureRoutes(api) // Nueva ruta
-		permissionsroutes.ConfigureRoutes(api) // Nueva ruta
-		role_permissionroutes.ConfigureRoutes(api) // Nueva ruta
+		areachiefroutes.ConfigureRoutes(api)
+		requeststatusroutes.ConfigureRoutes(api)
+		requestroutes.ConfigureRoutes(api)
+		chiefs_periodroutes.ConfigureRoutes(api)
+		request_detailsroutes.ConfigureRoutes(api)
+		permissionsroutes.ConfigureRoutes(api)
+		role_permissionroutes.ConfigureRoutes(api)
 	}
 
 	// Iniciar servidor
