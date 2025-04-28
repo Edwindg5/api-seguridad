@@ -20,9 +20,6 @@ func (uc *CreateDelegationUseCase) Execute(ctx context.Context, delegation *enti
 	if delegation.Name == "" {
 		return errors.New("delegation name is required")
 	}
-	if delegation.MunicipalityID == 0 {
-		return errors.New("municipality ID is required")
-	}
 
 	return uc.repo.Create(ctx, delegation)
 }
