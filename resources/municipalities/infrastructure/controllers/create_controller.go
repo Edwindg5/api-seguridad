@@ -24,16 +24,32 @@ func (c *CreateMunicipalityController) Handle(ctx *gin.Context) {
 		return
 	}
 
+	// Set created_by from authenticated user
+	if userID, exists := ctx.Get("userID"); exists {
+		if uid, ok := userID.(uint); ok {
+			municipality.CreatedBy = uid
+			municipality.UpdatedBy = uid
+		}
+	}
+
 	if err := c.useCase.Execute(ctx.Request.Context(), &municipality); err != nil {
 		status := http.StatusInternalServerError
-		if err.Error() == "municipality name is required" {
+		switch err.Error() {
+		case "municipality name is required":
 			status = http.StatusBadRequest
-		} else if err.Error() == "municipality with this name already exists" {
+		case "municipality with this name already exists":
 			status = http.StatusConflict
 		}
 		utils.ErrorResponse(ctx, status, err.Error(), nil)
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusCreated, "Municipality created successfully", municipality)
+	// Get the created municipality with delegation data
+	createdMunicipality, err := c.useCase.GetByID(ctx.Request.Context(), municipality.GetID())
+	if err != nil {
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve created municipality", err)
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusCreated, "Municipality created successfully", createdMunicipality)
 }

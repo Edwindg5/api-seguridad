@@ -1,12 +1,14 @@
-//api-seguridad/resource/delegation/infrastructure/controllers/update_controller.go
+// api-seguridad/resource/delegation/infrastructure/controllers/update_controller.go
 package controllers
 
 import (
-	"net/http"
-	"strconv"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/delegation/application"
-	"api-seguridad/resources/delegation/domain/entities"
+
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +21,6 @@ func NewUpdateDelegationController(useCase *application.UpdateDelegationUseCase)
 }
 
 func (c *UpdateDelegationController) Handle(ctx *gin.Context) {
-	// Obtener el ID de la URL
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
@@ -27,23 +28,39 @@ func (c *UpdateDelegationController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var delegation entities.Delegation
-	if err := ctx.ShouldBindJSON(&delegation); err != nil {
+	existingDelegation, err := c.useCase.GetExistingDelegation(ctx.Request.Context(), uint(id))
+	if err != nil || existingDelegation == nil {
+		utils.ErrorResponse(ctx, http.StatusNotFound, "Delegation not found", nil)
+		return
+	}
+
+	var updateData struct {
+		Name   string `json:"name"`
+		Active bool   `json:"active"`
+	}
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	// Asignar el ID de la URL al objeto delegation
-	delegation.ID = uint(id)
+	existingDelegation.SetName(updateData.Name)
+	existingDelegation.SetActive(updateData.Active)
 
-	// Obtener ID del usuario que realiza la actualización
-	if updaterID, exists := ctx.Get("userID"); exists {
-		if uid, ok := updaterID.(uint); ok {
-			delegation.UpdatedBy = uid
+	if userID, exists := ctx.Get("userID"); exists {
+		if uid, ok := userID.(uint); ok {
+			existingDelegation.SetUpdatedBy(uid)
+		} else {
+			utils.ErrorResponse(ctx, http.StatusInternalServerError, "Invalid user ID format", nil)
+			return
 		}
+	} else {
+		utils.ErrorResponse(ctx, http.StatusUnauthorized, "User not authenticated", nil)
+		return
 	}
 
-	if err := c.useCase.Execute(ctx.Request.Context(), &delegation); err != nil {
+	existingDelegation.SetUpdatedAt(time.Now())
+
+	if err := c.useCase.Execute(ctx.Request.Context(), existingDelegation); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
 		case "invalid delegation ID", "delegation name is required":
@@ -55,5 +72,5 @@ func (c *UpdateDelegationController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Delegation updated successfully", delegation)
+	utils.SuccessResponse(ctx, http.StatusOK, "Delegation updated successfully", existingDelegation)
 }

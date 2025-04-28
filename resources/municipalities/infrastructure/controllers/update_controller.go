@@ -20,7 +20,6 @@ func NewUpdateMunicipalityController(useCase *application.UpdateMunicipalityUseC
 }
 
 func (c *UpdateMunicipalityController) Handle(ctx *gin.Context) {
-    // Obtener el ID de la URL
     idStr := ctx.Param("id")
     id, err := strconv.ParseUint(idStr, 10, 32)
     if err != nil {
@@ -28,23 +27,31 @@ func (c *UpdateMunicipalityController) Handle(ctx *gin.Context) {
         return
     }
 
-    var municipality entities.Municipality
-    if err := ctx.ShouldBindJSON(&municipality); err != nil {
+    var updateData struct {
+        Name         string `json:"name"`
+        DelegationID uint   `json:"delegation_id"`
+        Active       bool   `json:"active"`
+    }
+    
+    if err := ctx.ShouldBindJSON(&updateData); err != nil {
         utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
         return
     }
 
-    // Asignar el ID de la URL al objeto municipality
-    municipality.ID = uint(id)
+    municipality := &entities.Municipality{
+        ID:           uint(id),
+        Name:         updateData.Name,
+        DelegationID: updateData.DelegationID,
+    }
 
-    // Obtener ID del usuario que realiza la actualización
+    // Set updated_by from authenticated user
     if updaterID, exists := ctx.Get("userID"); exists {
         if uid, ok := updaterID.(uint); ok {
             municipality.UpdatedBy = uid
         }
     }
 
-    if err := c.useCase.Execute(ctx.Request.Context(), &municipality); err != nil {
+    if err := c.useCase.Execute(ctx.Request.Context(), municipality); err != nil {
         status := http.StatusInternalServerError
         switch err.Error() {
         case "invalid municipality ID", "municipality name is required":

@@ -16,6 +16,10 @@ func NewUpdateDelegationUseCase(repo repository.DelegationRepository) *UpdateDel
 	return &UpdateDelegationUseCase{repo: repo}
 }
 
+func (uc *UpdateDelegationUseCase) GetExistingDelegation(ctx context.Context, id uint) (*entities.Delegation, error) {
+	return uc.repo.GetByID(ctx, id)
+}
+
 func (uc *UpdateDelegationUseCase) Execute(ctx context.Context, delegation *entities.Delegation) error {
 	if delegation.ID == 0 {
 		return errors.New("invalid delegation ID")
@@ -31,6 +35,9 @@ func (uc *UpdateDelegationUseCase) Execute(ctx context.Context, delegation *enti
 	if existingDelegation == nil || existingDelegation.IsDeleted() {
 		return errors.New("delegation not found")
 	}
+
+	delegation.SetCreatedBy(existingDelegation.GetCreatedBy())
+	delegation.SetCreatedAt(existingDelegation.GetCreatedAt())
 
 	return uc.repo.Update(ctx, delegation)
 }

@@ -20,14 +20,17 @@ func NewDelegationRepository(db *gorm.DB) repository.DelegationRepository {
 }
 
 func (r *DelegationRepositoryImpl) Create(ctx context.Context, delegation *entities.Delegation) error {
-	return r.db.WithContext(ctx).Create(delegation).Error
+    // Asegurar que los campos requeridos estén establecidos
+    if delegation.GetCreatedBy() == 0 {
+        return errors.New("created_by is required")
+    }
+    
+    return r.db.WithContext(ctx).Create(delegation).Error
 }
-
 func (r *DelegationRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Delegation, error) {
 	var delegation entities.Delegation
 	err := r.db.WithContext(ctx).
 		Where("id_delegation = ? AND deleted = ?", id, false).
-		Preload("Municipality").
 		First(&delegation).Error
 		
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -40,7 +43,6 @@ func (r *DelegationRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Dele
 	var delegations []*entities.Delegation
 	err := r.db.WithContext(ctx).
 		Where("deleted = ?", false).
-		Preload("Municipality").
 		Find(&delegations).Error
 	return delegations, err
 }
@@ -48,6 +50,8 @@ func (r *DelegationRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Dele
 func (r *DelegationRepositoryImpl) Update(ctx context.Context, delegation *entities.Delegation) error {
 	return r.db.WithContext(ctx).Save(delegation).Error
 }
+
+
 
 func (r *DelegationRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).

@@ -18,15 +18,19 @@ type MunicipalityRepositoryImpl struct {
 func NewMunicipalityRepository(db *gorm.DB) repository.MunicipalityRepository {
 	return &MunicipalityRepositoryImpl{db: db}
 }
-
 func (r *MunicipalityRepositoryImpl) Create(ctx context.Context, municipality *entities.Municipality) error {
-	return r.db.WithContext(ctx).Create(municipality).Error
+	if err := r.db.WithContext(ctx).Create(municipality).Error; err != nil {
+		return err
+	}
+	// Load the delegation relationship after creation
+	return r.db.WithContext(ctx).Preload("Delegation").First(municipality, municipality.ID).Error
 }
 
 func (r *MunicipalityRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.Municipality, error) {
 	var municipality entities.Municipality
 	err := r.db.WithContext(ctx).
 		Where("id_municipalities = ? AND deleted = ?", id, false).
+		Preload("Delegation").
 		First(&municipality).Error
 		
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -39,6 +43,7 @@ func (r *MunicipalityRepositoryImpl) GetByName(ctx context.Context, name string)
 	var municipality entities.Municipality
 	err := r.db.WithContext(ctx).
 		Where("name_municipalities = ? AND deleted = ?", name, false).
+		Preload("Delegation").
 		First(&municipality).Error
 		
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -51,6 +56,7 @@ func (r *MunicipalityRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Mu
 	var municipalities []*entities.Municipality
 	err := r.db.WithContext(ctx).
 		Where("deleted = ?", false).
+		Preload("Delegation").
 		Find(&municipalities).Error
 	return municipalities, err
 }

@@ -31,3 +31,7 @@ func (uc *PostMunicipalityUseCase) Execute(ctx context.Context, municipality *en
 
 	return uc.repo.Create(ctx, municipality)
 }
+
+func (uc *PostMunicipalityUseCase) GetByID(ctx context.Context, id uint) (*entities.Municipality, error) {
+	return uc.repo.GetByID(ctx, id)
+}
