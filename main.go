@@ -67,7 +67,7 @@ func main() {
 		delegationroutes.ConfigureRoutes(api)
 		typepoliceroutes.ConfigureRoutes(api)
 		areachiefroutes.ConfigureRoutes(api) // Nueva ruta
-		requeststatusroutes.ConfigureRoutes(api) // Nueva ruta
+		requeststatusroutes.ConfigureRoutes(api) // Nue	va ruta
 		requestroutes.ConfigureRoutes(api) // Nueva ruta
 		chiefs_periodroutes.ConfigureRoutes(api) // Nueva ruta
 		request_detailsroutes.ConfigureRoutes(api) // Nueva ruta
