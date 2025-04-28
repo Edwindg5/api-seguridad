@@ -21,7 +21,7 @@ var (
 
 )
 
-func InitRolePermissionsDependencies() {
+func InitDependencies() {
 	db := database.GetDB()
 	
 	// Initialize repository

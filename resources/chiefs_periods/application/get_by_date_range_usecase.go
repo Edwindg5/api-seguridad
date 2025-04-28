@@ -18,12 +18,14 @@ func NewGetChiefsPeriodsByDateRangeUseCase(repo repository.ChiefsPeriodRepositor
 }
 
 func (uc *GetChiefsPeriodsByDateRangeUseCase) Execute(ctx context.Context, start, end time.Time) ([]*entities.ChiefsPeriod, error) {
-	if start.IsZero() || end.IsZero() {
-		return nil, errors.New("both start and end dates are required")
-	}
-	if start.After(end) {
-		return nil, errors.New("start date cannot be after end date")
-	}
-
-	return uc.repo.GetPeriodsByDateRange(ctx, start, end)
+    // Validaciones adicionales
+    if start.IsZero() || end.IsZero() {
+        return nil, errors.New("dates cannot be zero")
+    }
+    
+    // Asegurar que las fechas estén en UTC
+    start = start.UTC()
+    end = end.UTC()
+    
+    return uc.repo.GetPeriodsByDateRange(ctx, start, end)
 }

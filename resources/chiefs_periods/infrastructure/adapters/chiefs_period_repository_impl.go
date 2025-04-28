@@ -93,15 +93,35 @@ func (r *ChiefsPeriodRepositoryImpl) GetActivePeriod(ctx context.Context) (*enti
 
 // GetPeriodsByDateRange busca periodos en un rango de fechas
 func (r *ChiefsPeriodRepositoryImpl) GetPeriodsByDateRange(ctx context.Context, start, end time.Time) ([]*entities.ChiefsPeriod, error) {
-	var periods []*entities.ChiefsPeriod
-	err := r.db.WithContext(ctx).
-		Where("((start_date BETWEEN ? AND ?) OR (end_date BETWEEN ? AND ?) OR (start_date <= ? AND (end_date >= ? OR end_date IS NULL)) AND deleted = ?",
-			start, end, start, end, start, start, false).
-		Preload("CeoChief").
-		Preload("LegalChief").
-		Order("start_date DESC").
-		Find(&periods).Error
-	return periods, err
+    var periods []*entities.ChiefsPeriod
+    
+    // Formatear fechas para la consulta SQL
+    startFormatted := start.Format("2006-01-02 15:04:05")
+    endFormatted := end.Format("2006-01-02 15:04:05")
+    
+    // Consulta corregida con paréntesis balanceados
+    query := `
+        (start_date BETWEEN ? AND ?) OR 
+        (end_date BETWEEN ? AND ?) OR 
+        (start_date <= ? AND (end_date >= ? OR end_date IS NULL))
+    `
+    
+    err := r.db.WithContext(ctx).
+        Where(query+" AND deleted = ?", 
+            startFormatted, endFormatted,
+            startFormatted, endFormatted,
+            startFormatted, startFormatted,
+            false).
+        Preload("CeoChief").
+        Preload("LegalChief").
+        Order("start_date DESC").
+        Find(&periods).Error
+        
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return []*entities.ChiefsPeriod{}, nil
+    }
+    
+    return periods, err
 }
 
 // GetCurrentPeriod obtiene el periodo actual (que incluye la fecha actual)

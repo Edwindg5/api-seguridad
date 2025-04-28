@@ -19,18 +19,21 @@ func NewUpdateChiefsPeriodController(useCase *application.UpdateChiefsPeriodUseC
 }
 
 func (c *UpdateChiefsPeriodController) Handle(ctx *gin.Context) {
+	// Parsear el ID del periodo
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)
 	if err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid period ID", err)
 		return
 	}
 
+	// Bind del JSON de entrada
 	var period entities.ChiefsPeriod
 	if err := ctx.ShouldBindJSON(&period); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
+	// Asignar el ID
 	period.ID = uint(id)
 
 	// Obtener ID del usuario que realiza la actualización
@@ -40,6 +43,7 @@ func (c *UpdateChiefsPeriodController) Handle(ctx *gin.Context) {
 		}
 	}
 
+	// Ejecutar el caso de uso para la actualización
 	if err := c.useCase.Execute(ctx.Request.Context(), &period); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
@@ -49,6 +53,8 @@ func (c *UpdateChiefsPeriodController) Handle(ctx *gin.Context) {
 			status = http.StatusNotFound
 		case "there is already an active period":
 			status = http.StatusConflict
+		case "start date cannot be after end date":
+			status = http.StatusBadRequest
 		}
 		utils.ErrorResponse(ctx, status, err.Error(), nil)
 		return

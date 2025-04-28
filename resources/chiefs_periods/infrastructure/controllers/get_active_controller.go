@@ -19,11 +19,13 @@ func NewGetActiveChiefsPeriodController(useCase *application.GetActiveChiefsPeri
 func (c *GetActiveChiefsPeriodController) Handle(ctx *gin.Context) {
 	period, err := c.useCase.Execute(ctx.Request.Context())
 	if err != nil {
-		status := http.StatusInternalServerError
-		if err.Error() == "no active period found" {
-			status = http.StatusNotFound
-		}
-		utils.ErrorResponse(ctx, status, err.Error(), nil)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to retrieve active period", err)
+		return
+	}
+
+	if period == nil {
+		// Cambiado a StatusOK con un mensaje claro
+		utils.SuccessResponse(ctx, http.StatusOK, "No active period found", nil)
 		return
 	}
 

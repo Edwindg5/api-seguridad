@@ -18,30 +18,54 @@ func NewGetChiefsPeriodsByDateRangeController(useCase *application.GetChiefsPeri
 }
 
 func (c *GetChiefsPeriodsByDateRangeController) Handle(ctx *gin.Context) {
-	startStr := ctx.Query("start_date")
-	endStr := ctx.Query("end_date")
+    // Validar parámetros requeridos
+    startStr := ctx.Query("start_date")
+    if startStr == "" {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "start_date parameter is required", nil)
+        return
+    }
+    
+    endStr := ctx.Query("end_date")
+    if endStr == "" {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "end_date parameter is required", nil)
+        return
+    }
 
-	start, err := time.Parse("2006-01-02", startStr)
-	if err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid start date format (YYYY-MM-DD required)", err)
-		return
-	}
+    // Parsear fechas con manejo de errores
+    start, err := time.Parse("2006-01-02", startStr)
+    if err != nil {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid start date format (use YYYY-MM-DD)", err)
+        return
+    }
 
-	end, err := time.Parse("2006-01-02", endStr)
-	if err != nil {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid end date format (YYYY-MM-DD required)", err)
-		return
-	}
+    end, err := time.Parse("2006-01-02", endStr)
+    if err != nil {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid end date format (use YYYY-MM-DD)", err)
+        return
+    }
 
-	periods, err := c.useCase.Execute(ctx.Request.Context(), start, end)
-	if err != nil {
-		status := http.StatusInternalServerError
-		if err.Error() == "start date cannot be after end date" {
-			status = http.StatusBadRequest
-		}
-		utils.ErrorResponse(ctx, status, err.Error(), nil)
-		return
-	}
+    // Validar rango de fechas
+    if start.After(end) {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "start_date cannot be after end_date", nil)
+        return
+    }
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Chiefs periods retrieved successfully", periods)
+    // Ajustar las fechas para incluir todo el día
+    start = start.UTC().Truncate(24 * time.Hour)
+    end = end.UTC().Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+
+    // Ejecutar consulta
+    periods, err := c.useCase.Execute(ctx.Request.Context(), start, end)
+    if err != nil {
+        utils.ErrorResponse(ctx, http.StatusInternalServerError, "Error retrieving periods", err)
+        return
+    }
+
+    // Manejar caso de no resultados
+    if len(periods) == 0 {
+        utils.SuccessResponse(ctx, http.StatusOK, "No periods found for the given date range", []interface{}{})
+        return
+    }
+
+    utils.SuccessResponse(ctx, http.StatusOK, "Chiefs periods retrieved successfully", periods)
 }

@@ -3,7 +3,6 @@ package application
 
 import (
 	"context"
-	"errors"
 	"api-seguridad/resources/chiefs_periods/domain/entities"
 	"api-seguridad/resources/chiefs_periods/domain/repository"
 )
@@ -22,7 +21,7 @@ func (uc *GetActiveChiefsPeriodUseCase) Execute(ctx context.Context) (*entities.
 		return nil, err
 	}
 	if period == nil {
-		return nil, errors.New("no active period found")
+		return nil, nil // Retornar nil sin error para indicar "no encontrado"
 	}
 	return period, nil
 }

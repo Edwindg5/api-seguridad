@@ -9,16 +9,15 @@ import (
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
-	// Initialize controllers
+
 	createCtrl := controllers.NewCreateAreaChiefController(dependencies.GetCreateAreaChiefUseCase())
 	getByIDCtrl := controllers.NewGetAreaChiefByIDController(dependencies.GetAreaChiefByIDUseCase())
 	getAllCtrl := controllers.NewGetAllAreaChiefsController(dependencies.GetAllAreaChiefsUseCase())
 	updateCtrl := controllers.NewUpdateAreaChiefController(dependencies.GetUpdateAreaChiefUseCase())
 	deleteCtrl := controllers.NewDeleteAreaChiefController(dependencies.GetDeleteAreaChiefUseCase())
 
-	// Define routes with authentication middleware
 	chiefRoutes := router.Group("/area-chiefs")
-	chiefRoutes.Use(middleware.AuthMiddleware()) // Aplicar middleware a todas las rutas de area-chiefs
+	chiefRoutes.Use(middleware.AuthMiddleware()) 
 	{
 		chiefRoutes.POST("", createCtrl.Handle)
 		chiefRoutes.GET("", getAllCtrl.Handle)

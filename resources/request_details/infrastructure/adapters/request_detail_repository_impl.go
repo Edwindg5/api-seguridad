@@ -66,13 +66,26 @@ func (r *RequestDetailRepositoryImpl) GetByPoliceID(ctx context.Context, policeI
 		Find(&details).Error
 	return details, err
 }
-
-// Update actualiza un detalle existente
+// Update actualiza un detalle existente (versión corregida)
 func (r *RequestDetailRepositoryImpl) Update(ctx context.Context, detail *entities.RequestDetail) error {
-	detail.UpdatedAt = time.Now()
-	return r.db.WithContext(ctx).Save(detail).Error
+    detail.UpdatedAt = time.Now()
+    
+    // Actualiza solo los campos editables, excluyendo created_by y las claves foráneas
+    return r.db.WithContext(ctx).Model(detail).
+        Select(
+            "active", 
+            "census",
+            "located",
+            "register",
+            "approved",
+            "comments",
+            "municipality_active",
+            "updated_at",
+            "updated_by",
+        ).
+        Where("id = ?", detail.ID).
+        Updates(detail).Error
 }
-
 // Delete realiza un borrado lógico
 func (r *RequestDetailRepositoryImpl) Delete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).

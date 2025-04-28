@@ -19,7 +19,7 @@ var (
 	softDeletePermissionUseCase *application.SoftDeletePermissionUseCase
 )
 
-func InitPermissionsDependencies() {
+func InitDependencies() {
 	db := database.GetDB()
 	
 	// Initialize repository

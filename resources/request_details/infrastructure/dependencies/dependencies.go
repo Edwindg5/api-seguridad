@@ -20,7 +20,7 @@ var (
 	softDeleteRequestDetailUseCase   *application.SoftDeleteRequestDetailUseCase
 )
 
-func InitRequestDetailsDependencies() {
+func InitDependencies() {
 	db := database.GetDB()
 	
 	// Initialize repository

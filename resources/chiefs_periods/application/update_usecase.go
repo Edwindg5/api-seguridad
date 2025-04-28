@@ -33,6 +33,9 @@ func (uc *UpdateChiefsPeriodUseCase) Execute(ctx context.Context, period *entiti
 		return errors.New("period not found")
 	}
 
+	// Preservar el created_by del registro existente
+	period.CreatedBy = existing.CreatedBy
+
 	// Validar fechas
 	if !period.EndDate.IsZero() && period.StartDate.After(period.EndDate) {
 		return errors.New("start date cannot be after end date")

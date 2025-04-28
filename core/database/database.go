@@ -16,6 +16,10 @@ import (
 	entityroles "api-seguridad/resources/roles/domain/entities"
 	entitytypepolices "api-seguridad/resources/type_police/domain/entities"
 	entityusers "api-seguridad/resources/users/domain/entities"
+	entitychiefs_periods "api-seguridad/resources/chiefs_periods/domain/entities"
+	entitypermissions "api-seguridad/resources/permissions/domain/entities"
+	entityrole_permissions "api-seguridad/resources/role_permissions/domain/entities"
+	entityrequest_details "api-seguridad/resources/request_details/domain/entities"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -69,6 +73,10 @@ func RunMigrations() {
 		&entitypolice.Police{},
 		&entityrequeststatus.RequestStatus{},
 		&entityrequest.Request{},
+		&entitychiefs_periods.ChiefsPeriod{},
+		&entitypermissions.Permission{},
+		&entityrole_permissions.RolePermission{},
+		&entityrequest_details.RequestDetail{},
 	}
 
 	for _, table := range tables {

@@ -21,7 +21,7 @@ var (
 	getChiefsPeriodsByDateRangeUseCase *application.GetChiefsPeriodsByDateRangeUseCase
 )
 
-func InitChiefsPeriodsDependencies() {
+func InitDependencies() {
 	db := database.GetDB()
 	
 	// Initialize repository

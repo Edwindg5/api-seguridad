@@ -5,9 +5,10 @@ import (
 	"api-seguridad/resources/chiefs_periods/infrastructure/controllers"
 	"api-seguridad/resources/chiefs_periods/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
+	"api-seguridad/core/middleware"
 )
 
-func ConfigureChiefsPeriodRoutes(router *gin.RouterGroup, authMiddleware gin.HandlerFunc) {
+func ConfigureRoutes(router *gin.RouterGroup) {
 	// Initialize controllers
 	createCtrl := controllers.NewCreateChiefsPeriodController(dependencies.GetCreateChiefsPeriodUseCase())
 	getByIdCtrl := controllers.NewGetChiefsPeriodByIDController(dependencies.GetChiefsPeriodByIDUseCase())
@@ -19,16 +20,17 @@ func ConfigureChiefsPeriodRoutes(router *gin.RouterGroup, authMiddleware gin.Han
 
 	// Configure routes
 	chiefsRoutes := router.Group("/chiefs-periods")
+	chiefsRoutes.Use(middleware.AuthMiddleware())
 	{
 		// CRUD endpoints
-		chiefsRoutes.POST("", authMiddleware, createCtrl.Handle)
-		chiefsRoutes.GET("", authMiddleware, getAllCtrl.Handle)
-		chiefsRoutes.GET("/:id", authMiddleware, getByIdCtrl.Handle)
-		chiefsRoutes.PUT("/:id", authMiddleware, updateCtrl.Handle)
-		chiefsRoutes.DELETE("/:id", authMiddleware, deleteCtrl.Handle)
+		chiefsRoutes.POST("", createCtrl.Handle)
+		chiefsRoutes.GET("",  getAllCtrl.Handle)
+		chiefsRoutes.GET("/:id",  getByIdCtrl.Handle)
+		chiefsRoutes.PUT("/:id",  updateCtrl.Handle)			
+		chiefsRoutes.DELETE("/:id",  deleteCtrl.Handle)
 
 		// Special endpoints
-		chiefsRoutes.GET("/active", authMiddleware, getActiveCtrl.Handle)
-		chiefsRoutes.GET("/search", authMiddleware, getByDateRangeCtrl.Handle)
+		chiefsRoutes.GET("/active",  getActiveCtrl.Handle)
+		chiefsRoutes.GET("/search",  getByDateRangeCtrl.Handle)
 	}
 }

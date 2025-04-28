@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/request_details/application"
-	"api-seguridad/resources/request_details/domain/entities"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,32 +24,54 @@ func (c *UpdateRequestDetailController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	var detail entities.RequestDetail
-	if err := ctx.ShouldBindJSON(&detail); err != nil {
+	var updateData struct {
+		Active             bool   `json:"active"`
+		Census            bool   `json:"census"`
+		Located           bool   `json:"located"`
+		Register          bool   `json:"register"`
+		Approved          bool   `json:"approved"`
+		Comments          string `json:"comments"`
+		MunicipalityActive bool  `json:"municipality_active"`
+	}
+
+	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Datos inválidos", err)
 		return
 	}
 
-	detail.ID = uint(id)
-
 	// Obtener ID del usuario que actualiza
-	if updaterID, exists := ctx.Get("userID"); exists {
-		if uid, ok := updaterID.(uint); ok {
-			detail.UpdatedBy = uid
+	var updaterID uint
+	if uid, exists := ctx.Get("userID"); exists {
+		if u, ok := uid.(uint); ok {
+			updaterID = u
 		}
 	}
 
-	if err := c.useCase.Execute(ctx.Request.Context(), &detail); err != nil {
+	// Crear DTO para la actualización
+	updateDTO := application.UpdateRequestDetailDTO{
+		ID:                 uint(id),
+		Active:             updateData.Active,
+		Census:             updateData.Census,
+		Located:            updateData.Located,
+		Register:           updateData.Register,
+		Approved:           updateData.Approved,
+		Comments:           updateData.Comments,
+		MunicipalityActive: updateData.MunicipalityActive,
+		UpdaterID:          updaterID,
+	}
+
+	updatedDetail, err := c.useCase.ExecuteWithDTO(ctx.Request.Context(), &updateDTO)
+	if err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
-		case "ID inválido", "no se pueden modificar los IDs de solicitud o policía":
-			status = http.StatusBadRequest
 		case "detalle de solicitud no encontrado":
 			status = http.StatusNotFound
+		case "no se pueden modificar los IDs de solicitud o policía":
+			status = http.StatusBadRequest
 		}
 		utils.ErrorResponse(ctx, status, err.Error(), nil)
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Detalle de solicitud actualizado", detail)
+	utils.SuccessResponse(ctx, http.StatusOK, "Detalle de solicitud actualizado", updatedDetail)
 }
