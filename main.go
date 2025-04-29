@@ -1,4 +1,3 @@
-// api-seguridad/main.go
 package main
 
 import (
@@ -89,10 +88,10 @@ func main() {
 		role_permissionroutes.ConfigureRoutes(api)
 	}
 
-	// Iniciar servidor
+	// Iniciar servidor en 0.0.0.0 para permitir conexiones externas
 	cfg := config.LoadConfig()
 	log.Printf("Server running on port %s", cfg.AppPort)
-	if err := router.Run(":" + cfg.AppPort); err != nil {
+	if err := router.Run("0.0.0.0:" + cfg.AppPort); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
