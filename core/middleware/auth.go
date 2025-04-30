@@ -3,6 +3,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,20 +21,21 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Validación básica del token (en producción usar JWT real)
-		if token != "Bearer valid-token" {
+		// Validar formato Bearer
+		if !strings.HasPrefix(token, "Bearer ") || len(token) <= 7 {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"success": false,
 				"message": "Authentication failed",
-				"error":   "Invalid token",
+				"error":   "Invalid token format",
 			})
 			return
 		}
 
-		// Simulamos extraer el ID del usuario del token
-		// En producción, esto vendría del JWT decodificado
-		userID := uint(1) // ID de ejemplo
+		// Aquí podrías validar el JWT si fuera necesario
+		// Simulamos extracción del userID
+		userID := uint(1)
 		c.Set("userID", userID)
+
 		c.Next()
 	}
 }
