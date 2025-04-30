@@ -2,7 +2,7 @@
 package routes
 
 import (
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 	"api-seguridad/resources/request/infrastructure/controllers"
 	"api-seguridad/resources/request/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure API routes with authentication
 	requestRoutes := router.Group("/requests")
-	requestRoutes.Use(middleware.AuthMiddleware()) // Middleware aplicado a todas las rutas
+	//requestRoutes.Use(middleware.AuthMiddleware()) // Middleware aplicado a todas las rutas
 	{
 		// CRUD endpoints
 		requestRoutes.POST("", createCtrl.Handle)

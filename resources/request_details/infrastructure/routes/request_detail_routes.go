@@ -5,7 +5,7 @@ import (
 	"api-seguridad/resources/request_details/infrastructure/controllers"
 	"api-seguridad/resources/request_details/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
@@ -19,7 +19,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure routes
 	detailRoutes := router.Group("/request-details")
-	detailRoutes.Use(middleware.AuthMiddleware())
+	//detailRoutes.Use(middleware.AuthMiddleware())
 	{
 		// CRUD endpoints
 		detailRoutes.POST("", createCtrl.Handle)

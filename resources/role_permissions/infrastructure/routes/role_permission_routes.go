@@ -5,7 +5,7 @@ import (
 	"api-seguridad/resources/role_permissions/infrastructure/controllers"
 	"api-seguridad/resources/role_permissions/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
@@ -19,7 +19,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure routes
 	rpRoutes := router.Group("/role-permissions")
-	rpRoutes.Use(middleware.AuthMiddleware())
+	//rpRoutes.Use(middleware.AuthMiddleware())
 	{
 		// CRUD endpoints
 		rpRoutes.POST("", createCtrl.Handle)

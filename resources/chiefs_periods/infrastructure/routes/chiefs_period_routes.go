@@ -5,7 +5,7 @@ import (
 	"api-seguridad/resources/chiefs_periods/infrastructure/controllers"
 	"api-seguridad/resources/chiefs_periods/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
@@ -20,7 +20,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure routes
 	chiefsRoutes := router.Group("/chiefs-periods")
-	chiefsRoutes.Use(middleware.AuthMiddleware())
+	//chiefsRoutes.Use(middleware.AuthMiddleware())
 	{
 		// CRUD endpoints
 		chiefsRoutes.POST("", createCtrl.Handle)

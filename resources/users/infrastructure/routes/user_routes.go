@@ -2,7 +2,7 @@
 package routes
 
 import (
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/users/application"
 	"api-seguridad/resources/users/domain/entities"
@@ -46,7 +46,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 		// Rutas PROTEGIDAS (requieren autenticación)
 		protectedRoutes := userRoutes.Group("")
-		protectedRoutes.Use(middleware.AuthMiddleware())  // Middleware aplicado solo a estas rutas
+	//protectedRoutes.Use(middleware.AuthMiddleware())  // Middleware aplicado solo a estas rutas
 		{
 			protectedRoutes.POST("", createCtrl.Handle)
 			protectedRoutes.GET("/:id_user", getByIDCtrl.Handle)

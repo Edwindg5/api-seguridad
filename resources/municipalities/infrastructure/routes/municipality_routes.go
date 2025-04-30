@@ -2,7 +2,7 @@
 package routes
 
 import (
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 	"api-seguridad/resources/municipalities/infrastructure/controllers"
 	"api-seguridad/resources/municipalities/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure routes with auth middleware
 	municipalityRoutes := router.Group("/municipalities")
-	municipalityRoutes.Use(middleware.AuthMiddleware())
+	//municipalityRoutes.Use(middleware.AuthMiddleware())
 	{
 		municipalityRoutes.POST("", createCtrl.Handle)
 		municipalityRoutes.GET("", getAllCtrl.Handle)

@@ -5,7 +5,7 @@ import (
 	"api-seguridad/resources/permissions/infrastructure/controllers"
 	"api-seguridad/resources/permissions/infrastructure/dependencies"
 	"github.com/gin-gonic/gin"
-	"api-seguridad/core/middleware"
+	//"api-seguridad/core/middleware"
 )
 
 func ConfigureRoutes(router *gin.RouterGroup) {
@@ -18,7 +18,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 
 	// Configure routes
 	permissionRoutes := router.Group("/permissions")
-	permissionRoutes.Use(middleware.AuthMiddleware()) // Middleware de autenticación para todas las rutas
+	//permissionRoutes.Use(middleware.AuthMiddleware()) // Middleware de autenticación para todas las rutas
 	{
 		permissionRoutes.POST("", createCtrl.Handle)          // Crear permiso
 		permissionRoutes.GET("", getAllCtrl.Handle)           // Listar todos los permisos
