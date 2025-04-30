@@ -25,7 +25,9 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	listUC := application.NewListUsersUseCase(userRepo)
 	getByUsernameUC := application.NewGetUserByUsernameUseCase(userRepo)
 	getByEmailUC := application.NewGetUserByEmailUseCase(userRepo)
+	loginUC := application.NewLoginUseCase(userRepo) // Nuevo caso de uso
 
+	// Inicializar controladores
 	createCtrl := controllers.NewUserCreateController(createUC)
 	getByIDCtrl := controllers.NewUserGetByIDController(getByIDUC)
 	updateCtrl := controllers.NewUserUpdateController(updateUC)
@@ -33,12 +35,14 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	listCtrl := controllers.NewUserListController(listUC)
 	getByUsernameCtrl := controllers.NewUserGetByUsernameController(getByUsernameUC)
 	getByEmailCtrl := controllers.NewUserGetByEmailController(getByEmailUC)
+	loginCtrl := controllers.NewUserLoginController(loginUC) // Nuevo controlador
 
 	// Configurar rutas
 	userRoutes := router.Group("/users")
 	{
-		// Ruta PÚBLICA (sin autenticación)
-		userRoutes.GET("", listCtrl.Handle)  // Listar usuarios (acceso público)
+		// Rutas PÚBLICAS (sin autenticación)
+		userRoutes.POST("/login", loginCtrl.Handle) // Ruta de login
+		userRoutes.GET("", listCtrl.Handle)        // Listar usuarios (acceso público)
 
 		// Rutas PROTEGIDAS (requieren autenticación)
 		protectedRoutes := userRoutes.Group("")

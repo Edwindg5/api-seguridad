@@ -17,4 +17,9 @@ type UserRepository interface {
 	// Opcional: Métodos específicos para borrado lógico
 	SoftDelete(ctx context.Context, id uint, deleterID uint) error
 	ListActiveUsers(ctx context.Context) ([]*entities.User, error)
+
+	// Métodos para autenticación
+	Login(ctx context.Context, username string, password string) (*entities.User, string, error)
 }
+
+
