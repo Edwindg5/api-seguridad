@@ -46,18 +46,8 @@ func (c *UpdateDelegationController) Handle(ctx *gin.Context) {
 	existingDelegation.SetName(updateData.Name)
 	existingDelegation.SetActive(updateData.Active)
 
-	if userID, exists := ctx.Get("userID"); exists {
-		if uid, ok := userID.(uint); ok {
-			existingDelegation.SetUpdatedBy(uid)
-		} else {
-			utils.ErrorResponse(ctx, http.StatusInternalServerError, "Invalid user ID format", nil)
-			return
-		}
-	} else {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, "User not authenticated", nil)
-		return
-	}
-
+	// Set fixed UpdatedBy and timestamp
+	existingDelegation.SetUpdatedBy(1)
 	existingDelegation.SetUpdatedAt(time.Now())
 
 	if err := c.useCase.Execute(ctx.Request.Context(), existingDelegation); err != nil {
