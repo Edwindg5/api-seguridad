@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"net/http"
+
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/area_chiefs/application"
 	"api-seguridad/resources/area_chiefs/domain/entities"
@@ -24,26 +25,12 @@ func (c *CreateAreaChiefController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Obtener userID del contexto de autenticación
-	userID, exists := ctx.Get("userID")
-	if !exists {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
-		return
-	}
-
-	// Convertir y asignar el userID
-	if uid, ok := userID.(uint); ok {
-		chief.CreatedBy = uid
-		chief.UpdatedBy = uid
-	} else {
-		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Invalid user ID in context", nil)
-		return
-	}
+	// Se eliminó la asignación del usuario creador
 
 	if err := c.useCase.Execute(ctx.Request.Context(), &chief); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
-		case "chief name is required", "position is required", "creator user is required":
+		case "chief name is required", "position is required":
 			status = http.StatusBadRequest
 		}
 		utils.ErrorResponse(ctx, status, err.Error(), nil)
