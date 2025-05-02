@@ -5,15 +5,17 @@ import (
 	"context"
 	"errors"
 	"time"
+
 	"api-seguridad/resources/area_chiefs/domain/repository"
 )
 
-// AreaChiefUpdate represents the fields that can be updated
+
 type AreaChiefUpdate struct {
 	ID        uint
 	Name      string
 	Position  string
 	Type      string
+	Signature string 
 	UpdatedBy uint
 }
 
@@ -45,12 +47,16 @@ func (uc *UpdateAreaChiefUseCase) Execute(ctx context.Context, update *AreaChief
 		return errors.New("area chief not found")
 	}
 
-	// Update only the allowed fields
+
 	existing.Name = update.Name
 	existing.Position = update.Position
 	existing.Type = update.Type
 	existing.UpdatedBy = update.UpdatedBy
 	existing.UpdatedAt = time.Now()
+
+	if update.Signature != "" {
+		existing.SignaturePath = update.Signature
+	}
 
 	return uc.repo.Update(ctx, existing)
 }
