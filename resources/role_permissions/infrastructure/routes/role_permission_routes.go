@@ -24,7 +24,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	{
 		// CRUD endpoints
 		rpRoutes.POST("", createCtrl.Handle)
-		rpRoutes.GET("", getAllCtrl.Handle) // Nuevo endpoint para obtener todos
+		rpRoutes.GET("", getAllCtrl.Handle) // Nuevo endpoint para obtener todos xddd 
 		rpRoutes.GET("/:id", getByIdCtrl.Handle)
 		rpRoutes.GET("/check", getByRolePermCtrl.Handle) // ?role_id=X&permission_id=Y
 		rpRoutes.GET("/role/:role_id", getAllByRoleCtrl.Handle)
