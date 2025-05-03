@@ -145,3 +145,19 @@ func (r *RolePermissionRepositoryImpl) RevokePermission(ctx context.Context, rol
 			"updated_by": userID,
 		}).Error
 }
+
+
+// GetAll obtiene todas las relaciones rol-permiso activas
+func (r *RolePermissionRepositoryImpl) GetAll(ctx context.Context) ([]*entities.RolePermission, error) {
+	var rolePermissions []*entities.RolePermission
+	err := r.db.WithContext(ctx).
+		Where("deleted = ?", false).
+		Preload("Role").
+		Preload("Permission").
+		Preload("Creator").
+		Preload("Updater").
+		Order("created_at DESC").
+		Find(&rolePermissions).Error
+	
+	return rolePermissions, err
+}

@@ -16,9 +16,9 @@ var (
 	getRolePermissionByIDUseCase         *application.GetRolePermissionByIDUseCase
 	getByRoleAndPermissionUseCase        *application.GetByRoleAndPermissionUseCase
 	getAllByRoleUseCase                  *application.GetAllByRoleUseCase
+	getAllUseCase                        *application.GetAllUseCase // Nuevo use case
 	updateRolePermissionUseCase          *application.UpdateRolePermissionUseCase
 	deleteRolePermissionUseCase          *application.DeleteRolePermissionUseCase
-
 )
 
 func InitDependencies() {
@@ -32,6 +32,7 @@ func InitDependencies() {
 	getRolePermissionByIDUseCase = application.NewGetRolePermissionByIDUseCase(rolePermissionRepo)
 	getByRoleAndPermissionUseCase = application.NewGetByRoleAndPermissionUseCase(rolePermissionRepo)
 	getAllByRoleUseCase = application.NewGetAllByRoleUseCase(rolePermissionRepo)
+	getAllUseCase = application.NewGetAllUseCase(rolePermissionRepo) // Inicialización del nuevo use case
 	updateRolePermissionUseCase = application.NewUpdateRolePermissionUseCase(rolePermissionRepo)
 	deleteRolePermissionUseCase = application.NewDeleteRolePermissionUseCase(rolePermissionRepo)
 }
@@ -59,6 +60,11 @@ func GetUpdateRolePermissionUseCase() *application.UpdateRolePermissionUseCase {
 
 func GetDeleteRolePermissionUseCase() *application.DeleteRolePermissionUseCase {
 	return deleteRolePermissionUseCase
+}
+
+// Nuevo getter para el use case GetAll
+func GetAllUseCase() *application.GetAllUseCase {
+	return getAllUseCase
 }
 
 // Repository getter
