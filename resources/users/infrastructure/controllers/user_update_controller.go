@@ -3,7 +3,6 @@ package controllers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"api-seguridad/resources/users/application"
@@ -39,33 +38,8 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 	// Asignar ID desde el parámetro de la URL
 	user.ID = uint(id)
 
-	// Obtener ID del usuario que realiza la actualización
-	updaterID, exists := ctx.Get("userID")
-	if !exists {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, 
-			"Authentication required", 
-			errors.New("no se encontró userID en el contexto"))
-		return
-	}
-
-	// Convertir updaterID a uint
-	var updater uint
-	switch v := updaterID.(type) {
-	case uint:
-		updater = v
-	case int:
-		updater = uint(v)
-	case float64:
-		updater = uint(v)
-	default:
-		utils.ErrorResponse(ctx, http.StatusInternalServerError, 
-			"Invalid user ID type", 
-			fmt.Errorf("tipo de ID de usuario no válido: %T", updaterID))
-		return
-	}
-
 	// Ejecutar actualización
-	if err := c.updateUC.Execute(ctx.Request.Context(), &user, updater); err != nil {
+	if err := c.updateUC.Execute(ctx.Request.Context(), &user); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
 		   err.Error() == "new username already exists" ||
@@ -76,12 +50,5 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Obtener usuario actualizado para la respuesta usando el método público
-	updatedUser, err := c.updateUC.UserRepo.GetByID(ctx.Request.Context(), user.ID)
-	if err != nil {
-		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to get updated user", err)
-		return
-	}
-
-	utils.SuccessResponse(ctx, http.StatusOK, "User updated successfully", updatedUser)
+	utils.SuccessResponse(ctx, http.StatusOK, "User updated successfully", user)
 }

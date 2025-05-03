@@ -94,6 +94,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 	existingUser.Username = user.Username
 	existingUser.Email = user.Email
 	existingUser.RoleID = user.RoleID
+	existingUser.UpdatedAt = user.UpdatedAt
 	
 	// Actualizar contraseña solo si se proporcionó una nueva
 	if user.Password != "" {
@@ -104,11 +105,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 		existingUser.Password = string(hashedPassword)
 	}
 
-	// Mantener campos de auditoría originales
-	user.CreatedAt = existingUser.CreatedAt
-	user.CreatedBy = existingUser.CreatedBy
-
-	return r.db.WithContext(ctx).Omit("created_by", "updated_by").Save(user).Error
+	return r.db.WithContext(ctx).Save(existingUser).Error
 }
 
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {

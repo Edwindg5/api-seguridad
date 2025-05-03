@@ -10,19 +10,14 @@ import (
 )
 
 type UpdateUserUseCase struct {
-	UserRepo repository.UserRepository // Cambiado a exportado (con mayúscula)
+	UserRepo repository.UserRepository
 }
 
 func NewUpdateUserUseCase(userRepo repository.UserRepository) *UpdateUserUseCase {
 	return &UpdateUserUseCase{UserRepo: userRepo}
 }
 
-// GetUserRepo permite acceder al repositorio (opcional)
-func (uc *UpdateUserUseCase) GetUserRepo() repository.UserRepository {
-	return uc.UserRepo
-}
-
-func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, updaterID uint) error {
+func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User) error {
 	// Validar que el usuario exista
 	existingUser, err := uc.UserRepo.GetByID(ctx, user.ID)
 	if err != nil {
@@ -47,11 +42,11 @@ func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User, u
 
 	// Preparar datos para actualización
 	user.UpdatedAt = time.Now()
-	user.UpdatedBy = updaterID
 	
-	// No actualizar created_at y created_by
+	// Mantener datos originales de creación
 	user.CreatedAt = existingUser.CreatedAt
 	user.CreatedBy = existingUser.CreatedBy
+	user.Deleted = existingUser.Deleted
 
 	return uc.UserRepo.Update(ctx, user)
 }
