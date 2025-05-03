@@ -16,7 +16,7 @@ func NewDeleteUserUseCase(userRepo repository.UserRepository) *DeleteUserUseCase
 	return &DeleteUserUseCase{userRepo: userRepo}
 }
 
-func (uc *DeleteUserUseCase) Execute(ctx context.Context, id uint, deleterID uint) error {
+func (uc *DeleteUserUseCase) Execute(ctx context.Context, id uint) error {
 	// Obtener el usuario existente
 	user, err := uc.userRepo.GetByID(ctx, id)
 	if err != nil {
@@ -31,7 +31,6 @@ func (uc *DeleteUserUseCase) Execute(ctx context.Context, id uint, deleterID uin
 
 	// Realizar borrado lógico
 	user.Deleted = true
-	user.UpdatedBy = deleterID
 	user.UpdatedAt = time.Now()
 
 	return uc.userRepo.Update(ctx, user)

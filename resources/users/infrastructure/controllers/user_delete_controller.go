@@ -25,10 +25,7 @@ func (c *UserDeleteController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Get deleter ID from context (assuming JWT middleware sets it)
-	deleterID, _ := ctx.Get("userID")
-
-	if err := c.deleteUC.Execute(ctx.Request.Context(), uint(id), deleterID.(uint)); err != nil {
+	if err := c.deleteUC.Execute(ctx.Request.Context(), uint(id)); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
 		   err.Error() == "user already deleted" {

@@ -111,14 +111,13 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 	return r.db.WithContext(ctx).Omit("created_by", "updated_by").Save(user).Error
 }
 
-func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint, deleterID uint) error {
+func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).
 		Model(&entities.User{}).
 		Where("id_user = ?", id).
 		Updates(map[string]interface{}{
-			"deleted":     true,
-			"updated_by":  deleterID,
-			"updated_at":  gorm.Expr("CURRENT_TIMESTAMP"),
+			"deleted":    true,
+			"updated_at": time.Now(),
 		}).Error
 }
 

@@ -15,7 +15,7 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*entities.User, error)
 
 	// Opcional: Métodos específicos para borrado lógico
-	SoftDelete(ctx context.Context, id uint, deleterID uint) error
+	SoftDelete(ctx context.Context, id uint) error
 	ListActiveUsers(ctx context.Context) ([]*entities.User, error)
 
 	// Métodos para autenticación
