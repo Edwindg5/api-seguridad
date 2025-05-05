@@ -8,6 +8,7 @@ import (
 
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
+	rolEntities "api-seguridad/resources/roles/domain/entities"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -90,29 +91,35 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
         return errors.New("user not found")
     }
 
-    // Actualizar solo campos permitidos
-    existingUser.FirstName = user.FirstName
-    existingUser.LastName = user.LastName
-    existingUser.Username = user.Username
-    existingUser.Email = user.Email
-    existingUser.RoleID = user.RoleID
-    existingUser.UpdatedAt = time.Now()
-    existingUser.UpdatedBy = user.UpdatedBy
-    existingUser.Deleted = user.Deleted
+    // Verificar que el rol exista en la base de datos
+    var roleExists bool
+    err = r.db.WithContext(ctx).Model(&rolEntities.Role{}).
+        Select("count(*) > 0").
+        Where("id_rol = ? AND deleted = ?", user.RoleID, false).
+        Find(&roleExists).Error
+    
+    if err != nil {
+        return err
+    }
+    if !roleExists {
+        return errors.New("role not found")
+    }
 
-    // Mantener el created_by original para no violar la FK
+    // Actualizar solo campos permitidos
+    updates := map[string]interface{}{
+        "first_name": user.FirstName,
+        "lastname":   user.LastName,
+        "username":   user.Username,
+        "email":      user.Email,
+        "rol_id_fk":  user.RoleID,
+        "updated_at": user.UpdatedAt,
+        "updated_by": user.UpdatedBy,
+        "deleted":    user.Deleted,
+    }
+
     return r.db.WithContext(ctx).Model(&entities.User{}).
-        Where("id_user = ?", existingUser.ID).
-        Updates(map[string]interface{}{
-            "first_name": existingUser.FirstName,
-            "lastname":   existingUser.LastName,
-            "username":   existingUser.Username,
-            "email":      existingUser.Email,
-            "rol_id_fk":  existingUser.RoleID,
-            "updated_at": existingUser.UpdatedAt,
-            "updated_by": existingUser.UpdatedBy,
-            "deleted":    existingUser.Deleted,
-        }).Error
+        Where("id_user = ?", user.ID).
+        Updates(updates).Error
 }
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).

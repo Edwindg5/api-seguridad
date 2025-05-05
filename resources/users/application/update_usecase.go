@@ -18,35 +18,41 @@ func NewUpdateUserUseCase(userRepo repository.UserRepository) *UpdateUserUseCase
 }
 
 func (uc *UpdateUserUseCase) Execute(ctx context.Context, user *entities.User) error {
-	// Validar que el usuario exista
-	existingUser, err := uc.UserRepo.GetByID(ctx, user.ID)
-	if err != nil {
-		return err
-	}
-	if existingUser == nil || existingUser.Deleted {
-		return errors.New("user not found")
-	}
+    // Validar que el usuario exista
+    existingUser, err := uc.UserRepo.GetByID(ctx, user.ID)
+    if err != nil {
+        return err
+    }
+    if existingUser == nil || existingUser.Deleted {
+        return errors.New("user not found")
+    }
 
-	// Validar campos únicos si han cambiado
-	if user.Username != existingUser.Username {
-		if existing, err := uc.UserRepo.GetByUsername(ctx, user.Username); err == nil && existing != nil {
-			return errors.New("new username already exists")
-		}
-	}
+    // Validar que el rol exista (necesitarías inyectar un RoleRepository)
+    // Aquí asumimos que los roles válidos son > 0 según tu DB
+    if user.RoleID <= 0 {
+        return errors.New("role ID must be valid (greater than 0)")
+    }
 
-	if user.Email != existingUser.Email {
-		if existing, err := uc.UserRepo.GetByEmail(ctx, user.Email); err == nil && existing != nil {
-			return errors.New("new email already exists")
-		}
-	}
+    // Validar campos únicos si han cambiado
+    if user.Username != existingUser.Username {
+        if existing, err := uc.UserRepo.GetByUsername(ctx, user.Username); err == nil && existing != nil {
+            return errors.New("new username already exists")
+        }
+    }
 
-	// Preparar datos para actualización
-	user.UpdatedAt = time.Now()
-	
-	// Mantener datos originales de creación
-	user.CreatedAt = existingUser.CreatedAt
-	user.CreatedBy = existingUser.CreatedBy
-	user.Deleted = existingUser.Deleted
+    if user.Email != existingUser.Email {
+        if existing, err := uc.UserRepo.GetByEmail(ctx, user.Email); err == nil && existing != nil {
+            return errors.New("new email already exists")
+        }
+    }
 
-	return uc.UserRepo.Update(ctx, user)
+    // Preparar datos para actualización
+    user.UpdatedAt = time.Now()
+    
+    // Mantener datos originales de creación
+    user.CreatedAt = existingUser.CreatedAt
+    user.CreatedBy = existingUser.CreatedBy
+    user.Deleted = existingUser.Deleted
+
+    return uc.UserRepo.Update(ctx, user)
 }
