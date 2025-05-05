@@ -83,30 +83,24 @@ func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 }
 
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
-    // Obtener usuario existente
-    existingUser, err := r.GetByID(ctx, user.ID)
-    if err != nil {
-        return err
-    }
-    if existingUser == nil {
-        return errors.New("user not found")
-    }
+    // Debug: Mostrar datos antes de actualizar
+    fmt.Printf("Actualizando usuario con datos: %+v\n", user)
 
-    // Verificar que el rol exista en la base de datos
-    var roleExists bool
-    err = r.db.WithContext(ctx).Model(&rolEntities.Role{}).
-        Select("count(*) > 0").
+    // Verificar que el rol exista
+    var roleCount int64
+    err := r.db.WithContext(ctx).
+        Model(&rolEntities.Role{}).
         Where("id_rol = ? AND deleted = ?", user.RoleID, false).
-        Find(&roleExists).Error
+        Count(&roleCount).Error
     
     if err != nil {
-        return err
+        return fmt.Errorf("error verificando rol: %v", err)
     }
-    if !roleExists {
-        return errors.New("role not found")
+    if roleCount == 0 {
+        return errors.New("el ID de rol no existe o está desactivado")
     }
 
-    // Actualizar solo campos permitidos
+    // Actualización segura usando map
     updates := map[string]interface{}{
         "first_name": user.FirstName,
         "lastname":   user.LastName,
@@ -115,12 +109,21 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
         "rol_id_fk":  user.RoleID,
         "updated_at": user.UpdatedAt,
         "updated_by": user.UpdatedBy,
-        "deleted":    user.Deleted,
     }
 
-    return r.db.WithContext(ctx).Model(&entities.User{}).
+    result := r.db.WithContext(ctx).
+        Model(&entities.User{}).
         Where("id_user = ?", user.ID).
-        Updates(updates).Error
+        Updates(updates)
+
+    if result.Error != nil {
+        return fmt.Errorf("error al actualizar usuario: %v", result.Error)
+    }
+    if result.RowsAffected == 0 {
+        return errors.New("no se encontró el usuario para actualizar")
+    }
+
+    return nil
 }
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).

@@ -2,12 +2,14 @@
 package controllers
 
 import (
-	"errors"
-	"net/http"
-	"strconv"
+	"api-seguridad/core/utils"
 	"api-seguridad/resources/users/application"
 	"api-seguridad/resources/users/domain/entities"
-	"api-seguridad/core/utils"
+	"errors"
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,12 +31,13 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
         return
     }
 
+    // Estructura que coincide exactamente con lo que envía el frontend
     var request struct {
         FirstName string `json:"first_name"`
-        LastName  string `json:"last_name"`  // Mapea a 'lastname' en la entidad
+        LastName  string `json:"lastname"`  // Cambiado a lastname para coincidir
         Username  string `json:"username"`
         Email     string `json:"email"`
-        RoleID    uint   `json:"rol_id_fk"`  // Cambiado a rol_id_fk para coincidir con el frontend
+        RoleID    uint   `json:"rol_id_fk"`  // Nombre exacto del campo
     }
 
     if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -42,44 +45,39 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
         return
     }
 
-    // Validación del RoleID
+    // Validación más detallada del RoleID
     if request.RoleID == 0 {
-        utils.ErrorResponse(ctx, http.StatusBadRequest, "Role ID is required", 
-            errors.New("el ID de rol es requerido"))
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Role ID is required and must be greater than 0", 
+            errors.New("el ID de rol es requerido y debe ser mayor que 0"))
         return
     }
 
     user := &entities.User{
         ID:        uint(id),
         FirstName: request.FirstName,
-        LastName:  request.LastName, // Se mapeará a 'lastname' en la base de datos
+        LastName:  request.LastName,
         Username:  request.Username,
         Email:     request.Email,
-        RoleID:    request.RoleID, // Se mapeará a 'rol_id_fk' en la base de datos
+        RoleID:    request.RoleID,
         UpdatedAt: time.Now(),
-        UpdatedBy: 1, // Usuario admin por defecto
+        UpdatedBy: 1,
     }
 
+    // Debug: Mostrar datos recibidos
+    fmt.Printf("Datos recibidos para actualización: %+v\n", user)
+
     if err := c.updateUC.Execute(ctx.Request.Context(), user); err != nil {
+        // Manejo de errores mejorado
         statusCode := http.StatusInternalServerError
-        errorMessage := "Failed to update user"
+        errorMessage := err.Error()
         
-        switch err.Error() {
-        case "user not found":
+        switch {
+        case strings.Contains(err.Error(), "user not found"):
             statusCode = http.StatusNotFound
-            errorMessage = "User not found"
-        case "new username already exists":
+        case strings.Contains(err.Error(), "already exists"):
             statusCode = http.StatusConflict
-            errorMessage = "Username already in use"
-        case "new email already exists":
-            statusCode = http.StatusConflict
-            errorMessage = "Email already in use"
-        case "role not found":
+        case strings.Contains(err.Error(), "role"):
             statusCode = http.StatusBadRequest
-            errorMessage = "Invalid role ID"
-        case "role ID must be provided":
-            statusCode = http.StatusBadRequest
-            errorMessage = "Role ID is required"
         }
 
         utils.ErrorResponse(ctx, statusCode, errorMessage, err)
