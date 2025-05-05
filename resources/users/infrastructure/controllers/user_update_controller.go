@@ -29,33 +29,60 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
         return
     }
 
-    var user entities.User
-    if err := ctx.ShouldBindJSON(&user); err != nil {
+    var request struct {
+        FirstName string `json:"first_name"`
+        LastName  string `json:"last_name"`
+        Username  string `json:"username"`
+        Email     string `json:"email"`
+        RoleID    uint   `json:"role_id"`
+    }
+
+    if err := ctx.ShouldBindJSON(&request); err != nil {
         utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
         return
     }
 
-    // Validar que el rol_id_fk sea válido (debe ser > 0)
-    if user.RoleID <= 0 {
-        utils.ErrorResponse(ctx, http.StatusBadRequest, "Role ID is required and must be valid", 
-            errors.New("el ID de rol debe ser un número válido mayor a 0"))
+    // Validación del RoleID
+    if request.RoleID == 0 {
+        utils.ErrorResponse(ctx, http.StatusBadRequest, "Role ID is required", 
+            errors.New("el ID de rol es requerido"))
         return
     }
 
-    // Asignar ID y valores por defecto
-    user.ID = uint(id)
-    user.UpdatedAt = time.Now()
-    user.UpdatedBy = 1 // Usuario admin por defecto
+    user := &entities.User{
+        ID:        uint(id),
+        FirstName: request.FirstName,
+        LastName:  request.LastName,
+        Username:  request.Username,
+        Email:     request.Email,
+        RoleID:    request.RoleID,
+        UpdatedAt: time.Now(),
+        UpdatedBy: 1, // Usuario admin por defecto
+    }
 
-    if err := c.updateUC.Execute(ctx.Request.Context(), &user); err != nil {
+    if err := c.updateUC.Execute(ctx.Request.Context(), user); err != nil {
         statusCode := http.StatusInternalServerError
-        if err.Error() == "user not found" || 
-           err.Error() == "new username already exists" ||
-           err.Error() == "new email already exists" ||
-           err.Error() == "role not found" {
+        errorMessage := "Failed to update user"
+        
+        switch err.Error() {
+        case "user not found":
+            statusCode = http.StatusNotFound
+            errorMessage = "User not found"
+        case "new username already exists":
+            statusCode = http.StatusConflict
+            errorMessage = "Username already in use"
+        case "new email already exists":
+            statusCode = http.StatusConflict
+            errorMessage = "Email already in use"
+        case "role not found":
             statusCode = http.StatusBadRequest
+            errorMessage = "Invalid role ID"
+        case "role ID must be provided":
+            statusCode = http.StatusBadRequest
+            errorMessage = "Role ID is required"
         }
-        utils.ErrorResponse(ctx, statusCode, "Failed to update user", err)
+
+        utils.ErrorResponse(ctx, statusCode, errorMessage, err)
         return
     }
 

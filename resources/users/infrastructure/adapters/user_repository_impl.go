@@ -4,11 +4,12 @@ package adapters
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	rolEntities "api-seguridad/resources/roles/domain/entities"
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
-	rolEntities "api-seguridad/resources/roles/domain/entities"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -192,4 +193,17 @@ func (r *UserRepositoryImpl) generateJWTToken(user *entities.User) (string, erro
 	}
 
 	return signedToken, nil
+}
+
+func (r *UserRepositoryImpl) CheckRoleExists(ctx context.Context, roleID uint) (bool, error) {
+    var count int64
+    err := r.db.WithContext(ctx).
+        Model(&rolEntities.Role{}).
+        Where("id_rol = ? AND deleted = ?", roleID, false).
+        Count(&count).Error
+    
+    if err != nil {
+        return false, fmt.Errorf("error checking role existence: %w", err)
+    }
+    return count > 0, nil
 }
