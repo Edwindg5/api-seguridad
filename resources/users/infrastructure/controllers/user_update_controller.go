@@ -31,10 +31,10 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 
     var request struct {
         FirstName string `json:"first_name"`
-        LastName  string `json:"last_name"`
+        LastName  string `json:"last_name"`  // Mapea a 'lastname' en la entidad
         Username  string `json:"username"`
         Email     string `json:"email"`
-        RoleID    uint   `json:"role_id"`
+        RoleID    uint   `json:"rol_id_fk"`  // Cambiado a rol_id_fk para coincidir con el frontend
     }
 
     if err := ctx.ShouldBindJSON(&request); err != nil {
@@ -52,10 +52,10 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
     user := &entities.User{
         ID:        uint(id),
         FirstName: request.FirstName,
-        LastName:  request.LastName,
+        LastName:  request.LastName, // Se mapeará a 'lastname' en la base de datos
         Username:  request.Username,
         Email:     request.Email,
-        RoleID:    request.RoleID,
+        RoleID:    request.RoleID, // Se mapeará a 'rol_id_fk' en la base de datos
         UpdatedAt: time.Now(),
         UpdatedBy: 1, // Usuario admin por defecto
     }
