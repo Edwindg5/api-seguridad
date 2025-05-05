@@ -20,32 +20,29 @@ func NewUserDeleteController(deleteUC *application.DeleteUserUseCase) *UserDelet
 	return &UserDeleteController{deleteUC: deleteUC}
 }
 
-// En user_delete_controller.go
-// user_delete_controller.go
 func (c *UserDeleteController) Handle(ctx *gin.Context) {
-    id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
-    if err != nil {
-        utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", err)
-        return
-    }
+	id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
+	if err != nil {
+		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
 
-    // Crear un usuario con los datos necesarios para el borrado
-    user := &entities.User{
-        ID:        uint(id),
-        UpdatedBy: 1, // Usamos un ID por defecto (1 para admin)
-        UpdatedAt: time.Now(),
-        Deleted:   true,
-    }
+	user := &entities.User{
+		ID:        uint(id),
+		UpdatedBy: 1, // Usuario admin por defecto
+		UpdatedAt: time.Now(),
+		Deleted:   true,
+	}
 
-    if err := c.deleteUC.Execute(ctx.Request.Context(), user); err != nil {
-        statusCode := http.StatusInternalServerError
-        if err.Error() == "user not found" || 
-           err.Error() == "user already deleted" {
-            statusCode = http.StatusBadRequest
-        }
-        utils.ErrorResponse(ctx, statusCode, "Failed to delete user", err)
-        return
-    }
+	if err := c.deleteUC.Execute(ctx.Request.Context(), user); err != nil {
+		statusCode := http.StatusInternalServerError
+		if err.Error() == "user not found" || 
+		   err.Error() == "user already deleted" {
+			statusCode = http.StatusBadRequest
+		}
+		utils.ErrorResponse(ctx, statusCode, "Failed to delete user", err)
+		return
+	}
 
-    utils.SuccessResponse(ctx, http.StatusOK, "User deleted successfully", nil)
+	utils.SuccessResponse(ctx, http.StatusOK, "User deleted successfully", nil)
 }

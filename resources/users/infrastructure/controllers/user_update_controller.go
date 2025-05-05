@@ -8,6 +8,7 @@ import (
 	"api-seguridad/resources/users/application"
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/core/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,18 +22,10 @@ func NewUserUpdateController(updateUC *application.UpdateUserUseCase) *UserUpdat
 }
 
 func (c *UserUpdateController) Handle(ctx *gin.Context) {
-	// Obtener ID del usuario a actualizar
 	id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
 	if err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid user ID", 
 			errors.New("el ID de usuario debe ser un número válido"))
-		return
-	}
-
-	// Obtener el ID del usuario autenticado
-	authUserID, exists := ctx.Get("userID")
-	if !exists {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
 		return
 	}
 
@@ -42,11 +35,11 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Asignar ID desde el parámetro de la URL
+	// Asignar ID y valores por defecto
 	user.ID = uint(id)
-	user.UpdatedBy = authUserID.(uint)
+	user.UpdatedAt = time.Now()
+	user.UpdatedBy = 1 // Usuario admin por defecto
 
-	// Ejecutar actualización
 	if err := c.updateUC.Execute(ctx.Request.Context(), &user); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
