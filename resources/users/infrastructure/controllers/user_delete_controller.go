@@ -2,10 +2,12 @@
 package controllers
 
 import (
+	"api-seguridad/core/utils"
+	"api-seguridad/resources/users/application"
+	"api-seguridad/resources/users/domain/entities"
 	"net/http"
 	"strconv"
-	"api-seguridad/resources/users/application"
-	"api-seguridad/core/utils"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,7 +27,22 @@ func (c *UserDeleteController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.deleteUC.Execute(ctx.Request.Context(), uint(id)); err != nil {
+	// Obtener el ID del usuario autenticado
+	authUserID, exists := ctx.Get("userID")
+	if !exists {
+		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
+		return
+	}
+
+	// Crear un usuario con los datos necesarios para el borrado
+	user := &entities.User{
+		ID:        uint(id),
+		UpdatedBy: authUserID.(uint),
+		UpdatedAt: time.Now(),
+		Deleted:   true,
+	}
+
+	if err := c.deleteUC.Execute(ctx.Request.Context(), user); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
 		   err.Error() == "user already deleted" {

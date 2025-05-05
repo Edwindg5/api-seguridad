@@ -33,14 +33,16 @@ func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) er
 	}
 	user.Password = string(hashedPassword)
 
-	// Crear el usuario omitiendo los campos created_by y updated_by si son 0
-	if user.CreatedBy == 0 && user.UpdatedBy == 0 {
-		return r.db.WithContext(ctx).Omit("created_by", "updated_by").Create(user).Error
+	// Asignar valores por defecto si no están establecidos
+	if user.CreatedAt.IsZero() {
+		user.CreatedAt = time.Now()
 	}
-	
+	if user.UpdatedAt.IsZero() {
+		user.UpdatedAt = time.Now()
+	}
+
 	return r.db.WithContext(ctx).Create(user).Error
 }
-
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.User, error) {
 	var user entities.User
 	err := r.db.WithContext(ctx).
@@ -94,7 +96,12 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 	existingUser.Username = user.Username
 	existingUser.Email = user.Email
 	existingUser.RoleID = user.RoleID
-	existingUser.UpdatedAt = user.UpdatedAt
+	existingUser.UpdatedAt = time.Now()
+	
+	// Actualizar campos de auditoría solo si se proporcionan
+	if user.UpdatedBy > 0 {
+		existingUser.UpdatedBy = user.UpdatedBy
+	}
 	
 	// Actualizar contraseña solo si se proporcionó una nueva
 	if user.Password != "" {
@@ -107,7 +114,6 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 
 	return r.db.WithContext(ctx).Save(existingUser).Error
 }
-
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).
 		Model(&entities.User{}).

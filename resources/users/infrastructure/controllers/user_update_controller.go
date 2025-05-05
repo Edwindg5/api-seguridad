@@ -29,6 +29,13 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 		return
 	}
 
+	// Obtener el ID del usuario autenticado
+	authUserID, exists := ctx.Get("userID")
+	if !exists {
+		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
+		return
+	}
+
 	var user entities.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
@@ -37,6 +44,7 @@ func (c *UserUpdateController) Handle(ctx *gin.Context) {
 
 	// Asignar ID desde el parámetro de la URL
 	user.ID = uint(id)
+	user.UpdatedBy = authUserID.(uint)
 
 	// Ejecutar actualización
 	if err := c.updateUC.Execute(ctx.Request.Context(), &user); err != nil {

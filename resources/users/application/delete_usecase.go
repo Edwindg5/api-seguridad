@@ -4,7 +4,8 @@ package application
 import (
 	"context"
 	"errors"
-	"time"
+
+	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
 )
 
@@ -16,22 +17,24 @@ func NewDeleteUserUseCase(userRepo repository.UserRepository) *DeleteUserUseCase
 	return &DeleteUserUseCase{userRepo: userRepo}
 }
 
-func (uc *DeleteUserUseCase) Execute(ctx context.Context, id uint) error {
+// Cambiado para aceptar un *User en lugar de un uint
+func (uc *DeleteUserUseCase) Execute(ctx context.Context, user *entities.User) error {
 	// Obtener el usuario existente
-	user, err := uc.userRepo.GetByID(ctx, id)
+	existingUser, err := uc.userRepo.GetByID(ctx, user.ID)
 	if err != nil {
 		return err
 	}
-	if user == nil {
+	if existingUser == nil {
 		return errors.New("user not found")
 	}
-	if user.Deleted {
+	if existingUser.Deleted {
 		return errors.New("user already deleted")
 	}
 
-	// Realizar borrado lógico
-	user.Deleted = true
-	user.UpdatedAt = time.Now()
+	// Actualizar campos para borrado lógico
+	existingUser.Deleted = true
+	existingUser.UpdatedAt = user.UpdatedAt
+	existingUser.UpdatedBy = user.UpdatedBy
 
-	return uc.userRepo.Update(ctx, user)
+	return uc.userRepo.Update(ctx, existingUser)
 }
