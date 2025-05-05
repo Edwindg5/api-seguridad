@@ -32,6 +32,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	getByEmailCtrl := controllers.NewUserGetByEmailController(getByEmailUC)
 	loginCtrl := controllers.NewUserLoginController(loginUC)
 
+	// Cambiar esta parte en routes.go
 	userRoutes := router.Group("/users")
 	{
 		userRoutes.POST("/login", loginCtrl.Handle)
@@ -39,7 +40,8 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 		userRoutes.POST("", createCtrl.Handle)
 		userRoutes.GET("/:id_user", getByIDCtrl.Handle)
 		userRoutes.PUT("/:id_user", updateCtrl.Handle)
-		userRoutes.DELETE("/:id_user", deleteCtrl.Handle)
+		// Cambiar DELETE por PATCH para borrado lógico
+		userRoutes.PATCH("/:id_user", deleteCtrl.Handle)
 		userRoutes.GET("/username/:username", getByUsernameCtrl.Handle)
 		userRoutes.GET("/email/:email", getByEmailCtrl.Handle)
 	}
