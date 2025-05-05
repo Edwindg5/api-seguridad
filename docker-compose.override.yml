@@ -1,0 +1,5 @@
+services:
+  backend:
+    volumes:
+      - .:/app
+    command: sh -c "/usr/local/bin/wait-for-it.sh db:3306 --timeout=30 -- go run main.go"

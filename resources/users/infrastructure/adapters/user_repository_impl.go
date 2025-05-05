@@ -4,10 +4,8 @@ package adapters
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
-	rolEntities "api-seguridad/resources/roles/domain/entities"
 	"api-seguridad/resources/users/domain/entities"
 	"api-seguridad/resources/users/domain/repository"
 
@@ -35,16 +33,14 @@ func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) er
 	}
 	user.Password = string(hashedPassword)
 
-	// Asignar valores por defecto si no están establecidos
-	if user.CreatedAt.IsZero() {
-		user.CreatedAt = time.Now()
+	// Crear el usuario omitiendo los campos created_by y updated_by si son 0
+	if user.CreatedBy == 0 && user.UpdatedBy == 0 {
+		return r.db.WithContext(ctx).Omit("created_by", "updated_by").Create(user).Error
 	}
-	if user.UpdatedAt.IsZero() {
-		user.UpdatedAt = time.Now()
-	}
-
+	
 	return r.db.WithContext(ctx).Create(user).Error
 }
+
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uint) (*entities.User, error) {
 	var user entities.User
 	err := r.db.WithContext(ctx).
@@ -83,48 +79,35 @@ func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 }
 
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
-    // Debug: Mostrar datos antes de actualizar
-    fmt.Printf("Actualizando usuario con datos: %+v\n", user)
+	// Obtener usuario existente
+	existingUser, err := r.GetByID(ctx, user.ID)
+	if err != nil {
+		return err
+	}
+	if existingUser == nil {
+		return errors.New("user not found")
+	}
 
-    // Verificar que el rol exista
-    var roleCount int64
-    err := r.db.WithContext(ctx).
-        Model(&rolEntities.Role{}).
-        Where("id_rol = ? AND deleted = ?", user.RoleID, false).
-        Count(&roleCount).Error
-    
-    if err != nil {
-        return fmt.Errorf("error verificando rol: %v", err)
-    }
-    if roleCount == 0 {
-        return errors.New("el ID de rol no existe o está desactivado")
-    }
+	// Actualizar solo campos permitidos
+	existingUser.FirstName = user.FirstName
+	existingUser.LastName = user.LastName
+	existingUser.Username = user.Username
+	existingUser.Email = user.Email
+	existingUser.RoleID = user.RoleID
+	existingUser.UpdatedAt = user.UpdatedAt
+	
+	// Actualizar contraseña solo si se proporcionó una nueva
+	if user.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		existingUser.Password = string(hashedPassword)
+	}
 
-    // Actualización segura usando map
-    updates := map[string]interface{}{
-        "first_name": user.FirstName,
-        "lastname":   user.LastName,
-        "username":   user.Username,
-        "email":      user.Email,
-        "rol_id_fk":  user.RoleID,
-        "updated_at": user.UpdatedAt,
-        "updated_by": user.UpdatedBy,
-    }
-
-    result := r.db.WithContext(ctx).
-        Model(&entities.User{}).
-        Where("id_user = ?", user.ID).
-        Updates(updates)
-
-    if result.Error != nil {
-        return fmt.Errorf("error al actualizar usuario: %v", result.Error)
-    }
-    if result.RowsAffected == 0 {
-        return errors.New("no se encontró el usuario para actualizar")
-    }
-
-    return nil
+	return r.db.WithContext(ctx).Save(existingUser).Error
 }
+
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).
 		Model(&entities.User{}).
@@ -196,25 +179,4 @@ func (r *UserRepositoryImpl) generateJWTToken(user *entities.User) (string, erro
 	}
 
 	return signedToken, nil
-}
-
-func (r *UserRepositoryImpl) CheckRoleExists(ctx context.Context, roleID uint) (bool, error) {
-    var count int64
-    err := r.db.WithContext(ctx).
-        Model(&rolEntities.Role{}).
-        Where("id_rol = ? AND deleted = ?", roleID, false).
-        Count(&count).Error
-    
-    if err != nil {
-        return false, fmt.Errorf("error checking role existence: %w", err)
-    }
-    return count > 0, nil
-}
-func (r *UserRepositoryImpl) Exists(ctx context.Context, id uint) (bool, error) {
-	var count int64
-	err := r.db.WithContext(ctx).
-		Model(&entities.User{}).
-		Where("id_user = ? AND deleted = ?", id, false).
-		Count(&count).Error
-	return count > 0, err
 }

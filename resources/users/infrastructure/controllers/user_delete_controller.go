@@ -2,12 +2,10 @@
 package controllers
 
 import (
-	"api-seguridad/core/utils"
-	"api-seguridad/resources/users/application"
-	"api-seguridad/resources/users/domain/entities"
 	"net/http"
 	"strconv"
-	"time"
+	"api-seguridad/resources/users/application"
+	"api-seguridad/core/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,14 +25,7 @@ func (c *UserDeleteController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	user := &entities.User{
-		ID:        uint(id),
-		UpdatedBy: 1, // Usuario admin por defecto
-		UpdatedAt: time.Now(),
-		Deleted:   true,
-	}
-
-	if err := c.deleteUC.Execute(ctx.Request.Context(), user); err != nil {
+	if err := c.deleteUC.Execute(ctx.Request.Context(), uint(id)); err != nil {
 		statusCode := http.StatusInternalServerError
 		if err.Error() == "user not found" || 
 		   err.Error() == "user already deleted" {

@@ -2,29 +2,20 @@
 package controllers
 
 import (
-	"api-seguridad/core/utils"
-	"api-seguridad/resources/request_status/application"
-	"api-seguridad/resources/users/domain/repository"
-	userRepo "api-seguridad/resources/users/domain/repository"
 	"net/http"
 	"strconv"
-
+	"api-seguridad/core/utils"
+	"api-seguridad/resources/request_status/application"
+	
 	"github.com/gin-gonic/gin"
 )
 
 type UpdateRequestStatusController struct {
-	useCase     *application.UpdateRequestStatusUseCase
-	userRepo    userRepo.UserRepository
+	useCase *application.UpdateRequestStatusUseCase
 }
 
-func NewUpdateRequestStatusController(
-	useCase *application.UpdateRequestStatusUseCase,
-	userRepo repository.UserRepository,
-) *UpdateRequestStatusController {
-	return &UpdateRequestStatusController{
-		useCase:     useCase,
-		userRepo:    userRepo,
-	}
+func NewUpdateRequestStatusController(useCase *application.UpdateRequestStatusUseCase) *UpdateRequestStatusController {
+	return &UpdateRequestStatusController{useCase: useCase}
 }
 
 func (c *UpdateRequestStatusController) Handle(ctx *gin.Context) {
@@ -34,49 +25,35 @@ func (c *UpdateRequestStatusController) Handle(ctx *gin.Context) {
 		return
 	}
 
+	// Obtener el estado existente a través del use case
 	existingStatus, err := c.useCase.GetByID(ctx.Request.Context(), uint(id))
 	if err != nil || existingStatus == nil {
 		utils.ErrorResponse(ctx, http.StatusNotFound, "Status not found", err)
 		return
 	}
 
+	// Bind solo los campos actualizables
 	var updateData struct {
-		Name        string `json:"name" binding:"required,min=3,max=100"`
-		Description string `json:"description" binding:"max=255"`
+		Name        string `json:"name"`
+		Description string `json:"description"`
 	}
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	// Get updater user from context
-	updaterID, exists := ctx.Get("userID")
-	if !exists {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, "User not authenticated", nil)
-		return
-	}
-
-	uid, ok := updaterID.(uint)
-	if !ok {
-		utils.ErrorResponse(ctx, http.StatusUnauthorized, "Invalid user ID", nil)
-		return
-	}
-
-	// Verify user exists
-	userExists, err := c.userRepo.Exists(ctx.Request.Context(), uid)
-	if err != nil {
-		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Error verifying user", err)
-		return
-	}
-	if !userExists {
-		utils.ErrorResponse(ctx, http.StatusBadRequest, "Updater user not found", nil)
-		return
-	}
-
+	// Actualizar campos
 	existingStatus.Name = updateData.Name
 	existingStatus.Description = updateData.Description
-	existingStatus.UpdatedBy = uid
+	
+	// Establecer usuario actualizador
+	if updaterID, exists := ctx.Get("userID"); exists {
+		if uid, ok := updaterID.(uint); ok {
+			existingStatus.UpdatedBy = uid
+		}
+	}
 
+	// Usar el use case para ejecutar la actualización
 	if err := c.useCase.Execute(ctx.Request.Context(), existingStatus); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {

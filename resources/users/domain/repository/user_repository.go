@@ -13,7 +13,6 @@ type UserRepository interface {
 	GetByID(ctx context.Context, id uint) (*entities.User, error)
 	GetByUsername(ctx context.Context, username string) (*entities.User, error)
 	GetByEmail(ctx context.Context, email string) (*entities.User, error)
-	CheckRoleExists(ctx context.Context, roleID uint) (bool, error) // Nuevo método añadido
 
 	// Opcional: Métodos específicos para borrado lógico
 	SoftDelete(ctx context.Context, id uint) error
@@ -21,6 +20,6 @@ type UserRepository interface {
 
 	// Métodos para autenticación
 	Login(ctx context.Context, username string, password string) (*entities.User, string, error)
-	Exists(ctx context.Context, id uint) (bool, error)
 }
+
 

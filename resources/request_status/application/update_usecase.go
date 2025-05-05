@@ -6,25 +6,18 @@ import (
 	"errors"
 	"time"
 	"api-seguridad/resources/request_status/domain/entities"
-	reqRepo "api-seguridad/resources/request_status/domain/repository"
-	userRepo "api-seguridad/resources/users/domain/repository"
+	"api-seguridad/resources/request_status/domain/repository"
 )
 
 type UpdateRequestStatusUseCase struct {
-	repo     reqRepo.RequestStatusRepository
-	userRepo userRepo.UserRepository
+	repo repository.RequestStatusRepository
 }
 
-func NewUpdateRequestStatusUseCase(
-	repo reqRepo.RequestStatusRepository,
-	userRepo userRepo.UserRepository,
-) *UpdateRequestStatusUseCase {
-	return &UpdateRequestStatusUseCase{
-		repo:     repo,
-		userRepo: userRepo,
-	}
+func NewUpdateRequestStatusUseCase(repo repository.RequestStatusRepository) *UpdateRequestStatusUseCase {
+	return &UpdateRequestStatusUseCase{repo: repo}
 }
 
+// Nuevo método para obtener por ID
 func (uc *UpdateRequestStatusUseCase) GetByID(ctx context.Context, id uint) (*entities.RequestStatus, error) {
 	if id == 0 {
 		return nil, errors.New("invalid status ID")
@@ -53,20 +46,13 @@ func (uc *UpdateRequestStatusUseCase) Execute(ctx context.Context, status *entit
 		return errors.New("updater user is required")
 	}
 
-	// Verify user exists
-	userExists, err := uc.userRepo.Exists(ctx, status.UpdatedBy)
-	if err != nil {
-		return err
-	}
-	if !userExists {
-		return errors.New("updater user not found")
-	}
-
+	// Verificar existencia
 	existing, err := uc.GetByID(ctx, status.ID)
 	if err != nil {
 		return err
 	}
 
+	// Verificar unicidad del nombre si cambió
 	if existing.Name != status.Name {
 		existingWithName, err := uc.repo.GetByName(ctx, status.Name)
 		if err != nil {
@@ -77,6 +63,7 @@ func (uc *UpdateRequestStatusUseCase) Execute(ctx context.Context, status *entit
 		}
 	}
 
+	// Actualizar timestamp
 	status.UpdatedAt = time.Now()
 
 	return uc.repo.Update(ctx, status)
