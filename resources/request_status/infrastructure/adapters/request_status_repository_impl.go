@@ -20,7 +20,6 @@ func NewRequestStatusRepository(db *gorm.DB) repository.RequestStatusRepository 
 }
 
 func (r *RequestStatusRepositoryImpl) Create(ctx context.Context, status *entities.RequestStatus) error {
-	// Ensure audit fields are set
 	if status.CreatedAt.IsZero() {
 		status.CreatedAt = time.Now()
 	}
@@ -68,13 +67,15 @@ func (r *RequestStatusRepositoryImpl) GetByName(ctx context.Context, name string
 }
 
 func (r *RequestStatusRepositoryImpl) Update(ctx context.Context, status *entities.RequestStatus) error {
-    return r.db.WithContext(ctx).Model(status).
-        Updates(map[string]interface{}{
-            "name":        status.Name,
-            "description": status.Description,
-            "updated_by":  status.UpdatedBy,
-            "updated_at":  time.Now(),
-        }).Error
+	return r.db.WithContext(ctx).
+		Model(&entities.RequestStatus{}).
+		Where("id_status = ?", status.ID).
+		Updates(map[string]interface{}{
+			"name":        status.Name,
+			"description": status.Description,
+			"updated_by":  status.UpdatedBy,
+			"updated_at":  time.Now(),
+		}).Error
 }
 
 func (r *RequestStatusRepositoryImpl) Delete(ctx context.Context, id uint) error {

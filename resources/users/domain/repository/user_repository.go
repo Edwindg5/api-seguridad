@@ -21,4 +21,6 @@ type UserRepository interface {
 
 	// Métodos para autenticación
 	Login(ctx context.Context, username string, password string) (*entities.User, string, error)
+	Exists(ctx context.Context, id uint) (bool, error)
 }
+

@@ -210,3 +210,11 @@ func (r *UserRepositoryImpl) CheckRoleExists(ctx context.Context, roleID uint) (
     }
     return count > 0, nil
 }
+func (r *UserRepositoryImpl) Exists(ctx context.Context, id uint) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&entities.User{}).
+		Where("id_user = ? AND deleted = ?", id, false).
+		Count(&count).Error
+	return count > 0, err
+}

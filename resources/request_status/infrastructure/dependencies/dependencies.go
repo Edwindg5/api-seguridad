@@ -5,12 +5,13 @@ import (
 	"api-seguridad/core/database"
 	"api-seguridad/resources/request_status/application"
 	"api-seguridad/resources/request_status/domain/repository"
+	reqRepo "api-seguridad/resources/request_status/domain/repository"
 	"api-seguridad/resources/request_status/infrastructure/adapters"
+	userDeps "api-seguridad/resources/users/infrastructure/dependencies"
 )
 
 var (
-	requestStatusRepo repository.RequestStatusRepository
-
+	requestStatusRepo reqRepo.RequestStatusRepository
 	// Use Cases
 	createRequestStatusUseCase     *application.CreateRequestStatusUseCase
 	getRequestStatusByIDUseCase    *application.GetRequestStatusByIDUseCase
@@ -29,9 +30,13 @@ func InitDependencies() {
 	createRequestStatusUseCase = application.NewCreateRequestStatusUseCase(requestStatusRepo)
 	getRequestStatusByIDUseCase = application.NewGetRequestStatusByIDUseCase(requestStatusRepo)
 	getAllRequestStatusUseCase = application.NewGetAllRequestStatusUseCase(requestStatusRepo)
-	updateRequestStatusUseCase = application.NewUpdateRequestStatusUseCase(requestStatusRepo)
+	updateRequestStatusUseCase = application.NewUpdateRequestStatusUseCase(
+		requestStatusRepo,
+		userDeps.GetUserRepository(),
+	)
 	deleteRequestStatusUseCase = application.NewDeleteRequestStatusUseCase(requestStatusRepo)
 }
+
 
 // Getter functions for use cases
 func GetCreateRequestStatusUseCase() *application.CreateRequestStatusUseCase {
@@ -54,7 +59,6 @@ func GetDeleteRequestStatusUseCase() *application.DeleteRequestStatusUseCase {
 	return deleteRequestStatusUseCase
 }
 
-// Repository getter
 func GetRequestStatusRepository() repository.RequestStatusRepository {
 	return requestStatusRepo
 }
