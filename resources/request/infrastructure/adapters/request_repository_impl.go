@@ -87,3 +87,28 @@ func (r *RequestRepositoryImpl) GetByMunicipality(ctx context.Context, municipal
 		Find(&requests).Error
 	return requests, err
 }
+
+
+func (r *RequestRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Request, error) {
+	var requests []*entities.Request
+	err := r.db.WithContext(ctx).
+		Where("deleted = ?", false).
+		Preload("Municipalities").
+		Preload("Status").
+		Preload("CeoChief").
+		Preload("LegalChief").
+		Preload("CreatedByUser").
+		Preload("UpdatedByUser").
+		Find(&requests).Error
+	
+	if err != nil {
+		return nil, err
+	}
+	
+	// Si no hay registros, retornar slice vacío en lugar de nil
+	if len(requests) == 0 {
+		return []*entities.Request{}, nil
+	}
+	
+	return requests, nil
+}

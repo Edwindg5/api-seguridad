@@ -12,6 +12,7 @@ type RequestRepository interface {
 	GetByID(ctx context.Context, id uint) (*entities.Request, error)
 	Update(ctx context.Context, request *entities.Request) error
 	Delete(ctx context.Context, id uint) error
+	GetAll(ctx context.Context) ([]*entities.Request, error)
 
 	// Specialized search methods
 	GetByStatus(ctx context.Context, statusID uint) ([]*entities.Request, error)

@@ -16,6 +16,7 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	deleteCtrl := controllers.NewDeleteRequestController(dependencies.GetDeleteRequestUseCase())
 	getByStatusCtrl := controllers.NewGetRequestsByStatusController(dependencies.GetRequestsByStatusUseCase())
 	getByMunicipalityCtrl := controllers.NewGetRequestsByMunicipalityController(dependencies.GetRequestsByMunicipalityUseCase())
+	getAllCtrl := controllers.NewGetAllRequestsController(dependencies.GetGetAllRequestsUseCase())
 
 	// Configure API routes with authentication
 	requestRoutes := router.Group("/requests")
@@ -23,12 +24,13 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	{
 		// CRUD endpoints
 		requestRoutes.POST("", createCtrl.Handle)
+		requestRoutes.GET("", getAllCtrl.Handle) // Nueva ruta para obtener todos
 		requestRoutes.GET("/:id", getByIdCtrl.Handle)
 		requestRoutes.PUT("/:id", updateCtrl.Handle)
 		requestRoutes.DELETE("/:id", deleteCtrl.Handle)
 
 		// Specialized endpoints
-		requestRoutes.GET("/status", getByStatusCtrl.Handle)
-		requestRoutes.GET("/municipality", getByMunicipalityCtrl.Handle)
+		requestRoutes.GET("/status/:statusId", getByStatusCtrl.Handle) // Cambiado a parámetro en ruta
+		requestRoutes.GET("/municipality/:municipalityId", getByMunicipalityCtrl.Handle) // Cambiado a parámetro en ruta
 	}
 }

@@ -18,6 +18,7 @@ var (
 	deleteRequestUseCase          *application.DeleteRequestUseCase
 	getRequestsByStatusUseCase    *application.GetRequestsByStatusUseCase
 	getRequestsByMunicipalityUseCase *application.GetRequestsByMunicipalityUseCase
+	getAllRequestsUseCase         *application.GetAllRequestsUseCase
 )
 
 func InitDependencies() {
@@ -33,6 +34,7 @@ func InitDependencies() {
 	deleteRequestUseCase = application.NewDeleteRequestUseCase(requestRepo)
 	getRequestsByStatusUseCase = application.NewGetRequestsByStatusUseCase(requestRepo)
 	getRequestsByMunicipalityUseCase = application.NewGetRequestsByMunicipalityUseCase(requestRepo)
+	getAllRequestsUseCase = application.NewGetAllRequestsUseCase(requestRepo)
 }
 
 // Getter functions for use cases
@@ -58,6 +60,10 @@ func GetRequestsByStatusUseCase() *application.GetRequestsByStatusUseCase {
 
 func GetRequestsByMunicipalityUseCase() *application.GetRequestsByMunicipalityUseCase {
 	return getRequestsByMunicipalityUseCase
+}
+
+func GetGetAllRequestsUseCase() *application.GetAllRequestsUseCase {
+	return getAllRequestsUseCase
 }
 
 // Repository getter
