@@ -17,7 +17,6 @@ func NewUpdateRequestUseCase(repo repository.RequestRepository) *UpdateRequestUs
 	return &UpdateRequestUseCase{repo: repo}
 }
 
-// Nuevo método para obtener request por ID
 func (uc *UpdateRequestUseCase) GetByID(ctx context.Context, id uint) (*entities.Request, error) {
 	if id == 0 {
 		return nil, errors.New("invalid request ID")
@@ -41,9 +40,6 @@ func (uc *UpdateRequestUseCase) Execute(ctx context.Context, request *entities.R
 	}
 	if request.OfficeNumber == "" {
 		return errors.New("office number is required")
-	}
-	if request.UpdatedBy == 0 {
-		return errors.New("updater user is required")
 	}
 
 	// Verificar que existe

@@ -7,6 +7,7 @@ import (
 	"api-seguridad/core/utils"
 	"api-seguridad/resources/request/application"
 	
+	"time"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,25 +33,46 @@ func (c *UpdateRequestController) Handle(ctx *gin.Context) {
 		return
 	}
 
-	// Bind solo campos actualizables
+	// Bind de todos los campos actualizables
 	var updateData struct {
-		OfficeNumber           string `json:"office_number"`
-		NumberOfLettersDelivered int  `json:"number_of_letters_delivered"`
-		DepartmentArea         string `json:"department_area"`
-		Phone                  string `json:"phone"`
+		OfficeNumber           string    `json:"office_number"`
+		MunicipalitiesID       uint      `json:"municipalities_id"`
+		StatusID               uint      `json:"status_id"`
+		ReceiptDate           time.Time `json:"receipt_date"`
+		Date                  time.Time `json:"date"`
+		SignatureName         string    `json:"signature_name"`
+		NumberPost            int       `json:"number_post"`
+		NumberOfLettersDelivered int    `json:"number_of_letters_delivered"`
+		DeliveryName          string    `json:"delivery_name"`
+		ReceiveName           string    `json:"receive_name"`
+		DepartmentArea        string    `json:"department_area"`
+		Phone                 string    `json:"phone"`
+		CeoChiefID            uint      `json:"ceo_chief_id"`
+		LegalChiefID          uint      `json:"legal_chief_id"`
 	}
+	
 	if err := ctx.ShouldBindJSON(&updateData); err != nil {
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	// Actualizar campos permitidos
+	// Actualizar todos los campos permitidos
 	existingRequest.OfficeNumber = updateData.OfficeNumber
+	existingRequest.MunicipalitiesID = updateData.MunicipalitiesID
+	existingRequest.StatusID = updateData.StatusID
+	existingRequest.ReceiptDate = updateData.ReceiptDate
+	existingRequest.Date = updateData.Date
+	existingRequest.SignatureName = updateData.SignatureName
+	existingRequest.NumberPost = updateData.NumberPost
 	existingRequest.NumberOfLettersDelivered = updateData.NumberOfLettersDelivered
+	existingRequest.DeliveryName = updateData.DeliveryName
+	existingRequest.ReceiveName = updateData.ReceiveName
 	existingRequest.DepartmentArea = updateData.DepartmentArea
 	existingRequest.Phone = updateData.Phone
+	existingRequest.CeoChiefID = updateData.CeoChiefID
+	existingRequest.LegalChiefID = updateData.LegalChiefID
 
-	// Establecer usuario actualizador
+	// Establecer usuario actualizador si está disponible (opcional)
 	if updaterID, exists := ctx.Get("userID"); exists {
 		if uid, ok := updaterID.(uint); ok {
 			existingRequest.UpdatedBy = uid
@@ -60,7 +82,7 @@ func (c *UpdateRequestController) Handle(ctx *gin.Context) {
 	if err := c.useCase.Execute(ctx.Request.Context(), existingRequest); err != nil {
 		status := http.StatusInternalServerError
 		switch err.Error() {
-		case "invalid request ID", "office number is required", "updater user is required":
+		case "invalid request ID", "office number is required":
 			status = http.StatusBadRequest
 		case "request not found":
 			status = http.StatusNotFound
