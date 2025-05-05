@@ -80,7 +80,6 @@ func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 	return &user, err
 }
 
-// user_repository_impl.go
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
     // Obtener usuario existente
     existingUser, err := r.GetByID(ctx, user.ID)
@@ -101,7 +100,19 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
     existingUser.UpdatedBy = user.UpdatedBy
     existingUser.Deleted = user.Deleted
 
-    return r.db.WithContext(ctx).Save(existingUser).Error
+    // Mantener el created_by original para no violar la FK
+    return r.db.WithContext(ctx).Model(&entities.User{}).
+        Where("id_user = ?", existingUser.ID).
+        Updates(map[string]interface{}{
+            "first_name": existingUser.FirstName,
+            "lastname":   existingUser.LastName,
+            "username":   existingUser.Username,
+            "email":      existingUser.Email,
+            "rol_id_fk":  existingUser.RoleID,
+            "updated_at": existingUser.UpdatedAt,
+            "updated_by": existingUser.UpdatedBy,
+            "deleted":    existingUser.Deleted,
+        }).Error
 }
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).
