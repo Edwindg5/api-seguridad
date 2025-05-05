@@ -80,39 +80,28 @@ func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*ent
 	return &user, err
 }
 
+// user_repository_impl.go
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
-	// Obtener usuario existente
-	existingUser, err := r.GetByID(ctx, user.ID)
-	if err != nil {
-		return err
-	}
-	if existingUser == nil {
-		return errors.New("user not found")
-	}
+    // Obtener usuario existente
+    existingUser, err := r.GetByID(ctx, user.ID)
+    if err != nil {
+        return err
+    }
+    if existingUser == nil {
+        return errors.New("user not found")
+    }
 
-	// Actualizar solo campos permitidos
-	existingUser.FirstName = user.FirstName
-	existingUser.LastName = user.LastName
-	existingUser.Username = user.Username
-	existingUser.Email = user.Email
-	existingUser.RoleID = user.RoleID
-	existingUser.UpdatedAt = time.Now()
-	
-	// Actualizar campos de auditoría solo si se proporcionan
-	if user.UpdatedBy > 0 {
-		existingUser.UpdatedBy = user.UpdatedBy
-	}
-	
-	// Actualizar contraseña solo si se proporcionó una nueva
-	if user.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		existingUser.Password = string(hashedPassword)
-	}
+    // Actualizar solo campos permitidos
+    existingUser.FirstName = user.FirstName
+    existingUser.LastName = user.LastName
+    existingUser.Username = user.Username
+    existingUser.Email = user.Email
+    existingUser.RoleID = user.RoleID
+    existingUser.UpdatedAt = time.Now()
+    existingUser.UpdatedBy = user.UpdatedBy
+    existingUser.Deleted = user.Deleted
 
-	return r.db.WithContext(ctx).Save(existingUser).Error
+    return r.db.WithContext(ctx).Save(existingUser).Error
 }
 func (r *UserRepositoryImpl) SoftDelete(ctx context.Context, id uint) error {
 	return r.db.WithContext(ctx).

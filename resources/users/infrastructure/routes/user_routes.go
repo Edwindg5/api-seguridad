@@ -31,20 +31,18 @@ func ConfigureRoutes(router *gin.RouterGroup) {
 	getByUsernameCtrl := controllers.NewUserGetByUsernameController(getByUsernameUC)
 	getByEmailCtrl := controllers.NewUserGetByEmailController(getByEmailUC)
 	loginCtrl := controllers.NewUserLoginController(loginUC)
-
-	// Cambiar esta parte en routes.go
+	
 	userRoutes := router.Group("/users")
-	{
-		userRoutes.POST("/login", loginCtrl.Handle)
-		userRoutes.GET("", listCtrl.Handle)
-		userRoutes.POST("", createCtrl.Handle)
-		userRoutes.GET("/:id_user", getByIDCtrl.Handle)
-		userRoutes.PUT("/:id_user", updateCtrl.Handle)
-		// Cambiar DELETE por PATCH para borrado lógico
-		userRoutes.PATCH("/:id_user", deleteCtrl.Handle)
-		userRoutes.GET("/username/:username", getByUsernameCtrl.Handle)
-		userRoutes.GET("/email/:email", getByEmailCtrl.Handle)
-	}
+    {
+        userRoutes.POST("/login", loginCtrl.Handle)
+        userRoutes.GET("", listCtrl.Handle)
+        userRoutes.POST("", createCtrl.Handle)
+        userRoutes.GET("/:id_user", getByIDCtrl.Handle)
+        userRoutes.PUT("/:id_user", updateCtrl.Handle)
+        userRoutes.PATCH("/:id_user", deleteCtrl.Handle)
+        userRoutes.GET("/username/:username", getByUsernameCtrl.Handle)
+        userRoutes.GET("/email/:email", getByEmailCtrl.Handle)
+    }
 
 	router.POST("/users/init-admin", func(c *gin.Context) {
 		var user entities.User

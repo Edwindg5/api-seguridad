@@ -21,6 +21,7 @@ func NewUserDeleteController(deleteUC *application.DeleteUserUseCase) *UserDelet
 }
 
 // En user_delete_controller.go
+// user_delete_controller.go
 func (c *UserDeleteController) Handle(ctx *gin.Context) {
     id, err := strconv.ParseUint(ctx.Param("id_user"), 10, 64)
     if err != nil {
@@ -28,17 +29,10 @@ func (c *UserDeleteController) Handle(ctx *gin.Context) {
         return
     }
 
-    // Obtener el ID del usuario autenticado
-    authUserID, exists := ctx.Get("userID")
-    if !exists {
-        utils.ErrorResponse(ctx, http.StatusUnauthorized, "Authentication required", nil)
-        return
-    }
-
     // Crear un usuario con los datos necesarios para el borrado
     user := &entities.User{
         ID:        uint(id),
-        UpdatedBy: authUserID.(uint),
+        UpdatedBy: 1, // Usamos un ID por defecto (1 para admin)
         UpdatedAt: time.Now(),
         Deleted:   true,
     }
